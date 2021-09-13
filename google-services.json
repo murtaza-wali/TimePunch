@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "523142427486",
+    "project_id": "timepunch-e27b4",
+    "storage_bucket": "timepunch-e27b4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523142427486:android:340a0b2b883ea9061455cf",
+        "android_client_info": {
+          "package_name": "com.artisticmilliners.timepunch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "523142427486-uunj9b74sc5s4mketgc4cof8jlcps1cc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.artisticmilliners.timepunch",
+            "certificate_hash": "36b1bb4faa2eec1df132a17d14549058e11e0cd1"
+          }
+        },
+        {
+          "client_id": "523142427486-37cujvebh1rtvmvddjo1h76qab22ac55.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIHQj89cHrBx0WMpT6lzIDVNgPbaG8dYg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "523142427486-37cujvebh1rtvmvddjo1h76qab22ac55.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
