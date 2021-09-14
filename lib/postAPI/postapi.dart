@@ -36,9 +36,9 @@ class postJSON {
     // Uri.parse must when you are passing URL.
     var deviceURL =
         Uri.parse(BaseURL().Auth + "timepunch/submit/" + employeecode);
-    print('Device  url${deviceURL}');
+    print('Device  url231${deviceURL}');
     var deviceresult = await http.post(deviceURL);
-    print('Device result${deviceresult.body}');
+    print('Device result231${deviceresult.body}');
     if (deviceresult.statusCode == 200) {
       return deviceresult;
     }

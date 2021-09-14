@@ -81,89 +81,100 @@ class _AccesskeyState extends State<Accesskey> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text('Access Key'),
       ),
-      body: SingleChildScrollView(
+      body: Align(
+        alignment: Alignment.center,
         child: Container(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-          Container(
-              margin: EdgeInsets.all(2),
-              child: TextField(
-                controller: accessIdController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Access ID',
-                ),
-                onChanged: (accesstext) {
-                  setState(() {});
-                },
-              )),
-          Container(
-            child: Center(
-              child: FlatButton(
-                color: Colors.black,
-                textColor: Colors.white,
-                child: Text('Enter'),
-                onPressed: () {
-                  setState(() {
-                    // yahan api hit honi hai ....
-                    if (accessIdController.text.isEmpty) {
-                      ErrorPopup(context, 'Alert',
-                          'All fields are required', 'OK');
-                    } else {
-                      postJSON()
-                          .Postdevice(
-                        accessIdController.text,
-                        _udid,
-                        _model,
-                        _os,
-                        _ip,
-                      )
-                          .then((value) {
-                        Map<String, dynamic> user = jsonDecode(value!.body);
-                        status = user['status'];
-                        active = user['isactive'];
-                        akey = user['akey'];
-                        empcode = user['empcode'];
-                        emp_name = user['emp_name'];
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      'Enter your Access key',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    )),
+                Container(
+                    margin: EdgeInsets.all(2),
+                    child: TextField(
+                      controller: accessIdController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Access ID',
+                      ),
+                      onChanged: (accesstext) {
+                        setState(() {});
+                      },
+                    )),
+                Container(
+                  child: Center(
+                    child: FlatButton(
+                      color: Colors.white,
+                      textColor: Colors.black,
+                      child: Text('Enter'),
+                      onPressed: () {
+                        setState(() {
+                          // yahan api hit honi hai ....
+                          if (accessIdController.text.isEmpty) {
+                            ErrorPopup(context, 'Alert',
+                                'All fields are required', 'OK');
+                          } else {
+                            postJSON()
+                                .Postdevice(
+                              accessIdController.text,
+                              _udid,
+                              _model,
+                              _os,
+                              _ip,
+                            )
+                                .then((value) {
+                              Map<String, dynamic> user =
+                                  jsonDecode(value!.body);
+                              status = user['status'];
+                              active = user['isactive'];
+                              akey = user['akey'];
+                              empcode = user['empcode'];
+                              emp_name = user['emp_name'];
+                              print('empcode${empcode}');
 
-                        if (status == 200) {
-                          print('status: ${status}');
-                          MySharedPreferences.instance
-                              .setIntValue("status", status);
-                          MySharedPreferences.instance
-                              .setStringValue("active", active);
-                          MySharedPreferences.instance
-                              .setStringValue("akey", akey);
-                          MySharedPreferences.instance
-                              .setStringValue("empcode", empcode);
-                          MySharedPreferences.instance
-                              .setStringValue("emp_name", emp_name);
-                          confirmationPopup(context, 'Success',
-                              'Successfully Registered!', 'OK');
-                        } else if (status == 404) {
-                          ErrorPopup(
-                              context, 'Error', 'Unsuccessfull!', 'OK');
-                        }
-                      });
-                    }
-                  });
-                },
-              ),
-            ),
-          ),
-        ],
-        ),
+                              if (status == 200) {
+                                print('status: ${status}');
+                                MySharedPreferences.instance
+                                    .setIntValue("status", status);
+                                MySharedPreferences.instance
+                                    .setStringValue("active", active);
+                                MySharedPreferences.instance
+                                    .setStringValue("akey", akey);
+                                MySharedPreferences.instance
+                                    .setStringValue("empcode", empcode);
+                                MySharedPreferences.instance
+                                    .setStringValue("emp_name", emp_name);
+                                confirmationPopup(context, 'Success',
+                                    'Successfully Registered!', 'OK');
+                              } else if (status == 404) {
+                                ErrorPopup(
+                                    context, 'Error', 'Enter Invalid Key!', 'OK');
+                              }
+                            });
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            )),
       ),
-    ),);
+    );
   }
 
-  ErrorPopup(BuildContext dialogContext, String title, String msg,
-      String okbtn) {
+  ErrorPopup(
+      BuildContext dialogContext, String title, String msg, String okbtn) {
     var alertStyle = AlertStyle(
       animationType: AnimationType.grow,
       overlayColor: Colors.black87,
@@ -193,8 +204,8 @@ class _AccesskeyState extends State<Accesskey> {
         ]).show();
   }
 
-  confirmationPopup(BuildContext dialogContext, String title, String msg,
-      String okbtn) {
+  confirmationPopup(
+      BuildContext dialogContext, String title, String msg, String okbtn) {
     var alertStyle = AlertStyle(
       animationType: AnimationType.grow,
       overlayColor: Colors.black87,
@@ -222,7 +233,7 @@ class _AccesskeyState extends State<Accesskey> {
                   MaterialPageRoute(
                       builder: (BuildContext context) =>
                           ListenLocationWidget()),
-                      (Route<dynamic> route) => false);
+                  (Route<dynamic> route) => false);
             },
             color: Colors.black,
           ),

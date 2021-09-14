@@ -84,6 +84,7 @@ class _ListenLocationState extends State<ListenLocationWidget> {
 
   // String am_location = '';
   late String emplloyeecode;
+  late String emplloyeename;
 
   @override
   void initState() {
@@ -92,8 +93,15 @@ class _ListenLocationState extends State<ListenLocationWidget> {
 
     MySharedPreferences.instance
         .getStringValue("empcode")
+        .then((code) => setState(() {
+              emplloyeecode = code;
+              print('employee code ${emplloyeecode}');
+            }));
+    MySharedPreferences.instance
+        .getStringValue("emp_name")
         .then((name) => setState(() {
-              emplloyeecode = name;
+              emplloyeename = name;
+              print('employee emp_name ${emplloyeecode}');
             }));
   }
 
@@ -165,6 +173,7 @@ class _ListenLocationState extends State<ListenLocationWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
         appBar: AppBar(
           title: Text('Time Punch'),
           // actions: <Widget>[
@@ -173,6 +182,19 @@ class _ListenLocationState extends State<ListenLocationWidget> {
           //     onPressed: _showInfoDialog,
           //   )63
           // ],
+          actions: [
+            new Stack(
+              alignment: Alignment.centerRight,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.refresh,color: Colors.white,),
+                  onPressed: _locationSubscription == null
+                      ? startSearch()
+                      : stopsearch(),
+                )
+              ],
+            )
+          ],
         ),
         body: SingleChildScrollView(
           child: Container(
@@ -186,27 +208,29 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                 // GetLocationWidget(),
                 // Divider(height: 32),
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     Text(
                       '$am_location ',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headline4,
+                      style: TextStyle(color: Colors.white,fontSize: 35),
                     ),
                     Divider(height: 32),
-                    Text(
+                    /*Text(
                       ' Latitude: ' +
                           ('${_location?.latitude}') +
                           '\n Longitude : ' +
                           ('${_location?.longitude}'),
-                    ),
+                    ),*/
                     if (checked)
                       GestureDetector(
                           child: Container(
                             width: 220,
                             height: 300,
+                            padding: const EdgeInsets.all(0.0),
+                            alignment: Alignment.center,
                             margin:
-                                const EdgeInsets.only(left: 50.0, top: 20.0),
+                                const EdgeInsets.only(left: 20.0, top: 20.0,right: 20),
                             decoration: BoxDecoration(
                                 boxShadow: [
                                   BoxShadow(
@@ -222,6 +246,7 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                                     Radius.elliptical(200, 250)),
                                 image: DecorationImage(
                                     image: AssetImage(
+
                                         "assets/fingerprintneon.png"),
                                     fit: BoxFit.cover)),
                             child: Container(),
@@ -231,9 +256,11 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                             postJSON()
                                 .PostemployeeAttendace(emplloyeecode)
                                 .then((value) {
-                              closeApp();
+                                  print('post : ${value}');
+                              confirmationPopup(context, "Thank you",
+                                  ' your attendance have been marked', 'OK');
                             });
-                            /*Navigator.push(
+                            /* Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => SuccessWidget()),
@@ -242,9 +269,11 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                     else
                       (Text(
                         'Please reach your unit to mark attendance',
+                        textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headline5,
                       )),
-                    Row(
+                   /* Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Container(
                           margin: const EdgeInsets.only(right: 42),
@@ -255,7 +284,7 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                         if (_locationSubscription == null)
                           (startSearchButton()),
                       ],
-                    ),
+                    ),*/
                   ],
                 ),
                 // ListenLocationWidget(),
@@ -278,6 +307,14 @@ class _ListenLocationState extends State<ListenLocationWidget> {
     } else {
       MinimizeApp.minimizeApp();
     }
+  }
+
+  stopsearch() {
+    _locationSubscription != null ? _stopListen : null;
+  }
+
+  startSearch() {
+    _locationSubscription == null ? _listenLocation : null;
   }
 
   Widget stopSearchButton() {
@@ -310,7 +347,7 @@ class _ListenLocationState extends State<ListenLocationWidget> {
         context: dialogContext,
         style: alertStyle,
         title: title,
-        desc: msg,
+        desc: emplloyeename + msg,
         buttons: [
           DialogButton(
             child: Text(
@@ -318,12 +355,13 @@ class _ListenLocationState extends State<ListenLocationWidget> {
               style: TextStyle(color: Colors.white, fontSize: 18),
             ),
             onPressed: () {
-              Navigator.pushAndRemoveUntil(
+              closeApp();
+              /*Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
                       builder: (BuildContext context) =>
                           ListenLocationWidget()),
-                  (Route<dynamic> route) => false);
+                  (Route<dynamic> route) => false);*/
             },
             color: Colors.black,
           ),

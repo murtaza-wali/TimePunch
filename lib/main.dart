@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'AccesskeyScreen.dart';
+import 'LocalStorage/MySharedPref.dart';
 import 'listen_location.dart';
 
 int? initScreen = 0;
@@ -52,10 +53,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final Location location = Location();
+  late String emplloyeecode;
 
   @override
   void initState() {
     super.initState();
+
     if (initScreen == null) {
       new Future.delayed(const Duration(seconds: 3), () {
         Navigator.pushAndRemoveUntil(
@@ -64,20 +67,44 @@ class _MyHomePageState extends State<MyHomePage> {
             (Route<dynamic> route) => false);
       });
     } else if (initScreen == 1) {
+      MySharedPreferences.instance
+          .getStringValue("empcode")
+          .then((code) => setState(() {
+                emplloyeecode = code;
+                print('employee code ${emplloyeecode}');
+                if (emplloyeecode == '') {
+                  new Future.delayed(const Duration(seconds: 3), () {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => Accesskey()),
+                        (Route<dynamic> route) => false);
+                  });
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              ListenLocationWidget()),
+                      (Route<dynamic> route) => false);
+                }
+              }));
+      /*  print('employee code ${emplloyeecode}');
       new Future.delayed(const Duration(seconds: 3), () {
         //
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
                 builder: (BuildContext context) => ListenLocationWidget()),
-            (Route<dynamic> route) => false);
-      });
+                (Route<dynamic> route) => false);
+      });*/
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(32),
