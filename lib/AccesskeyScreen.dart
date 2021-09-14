@@ -123,7 +123,8 @@ class _AccesskeyState extends State<Accesskey> {
                           if (accessIdController.text.isEmpty) {
                             ErrorPopup(context, 'Alert',
                                 'All fields are required', 'OK');
-                          } else {
+                          }
+                          else {
                             postJSON()
                                 .Postdevice(
                               accessIdController.text,
@@ -157,11 +158,15 @@ class _AccesskeyState extends State<Accesskey> {
                                 confirmationPopup(context, 'Success',
                                     'Successfully Registered!', 'OK');
                               } else if (status == 404) {
-                                ErrorPopup(
-                                    context, 'Error', 'Enter Invalid Key!', 'OK');
+                                ErrorPopup(context, 'Error',
+                                    'Enter Invalid Key!', 'OK');
                               }
                             });
                           }
+                          /*else {
+                          ErrorPopup(context, 'Error',
+                          'Enter Invalid Ke!', 'OK');
+                          }*/
                         });
                       },
                     ),

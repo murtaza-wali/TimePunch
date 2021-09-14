@@ -81,12 +81,13 @@ class _MyHomePageState extends State<MyHomePage> {
                         (Route<dynamic> route) => false);
                   });
                 } else {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              ListenLocationWidget()),
-                      (Route<dynamic> route) => false);
+                  new Future.delayed(const Duration(seconds: 3), () {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => ListenLocationWidget()),
+                            (Route<dynamic> route) => false);
+                  });
                 }
               }));
       /*  print('employee code ${emplloyeecode}');
@@ -105,26 +106,45 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(32),
+      body: Container(
+        child: Center(
           child: Column(
             children: <Widget>[
-              // PermissionStatusWidget(),
-              // Divider(height: 32),
-              // ServiceEnabledWidget(),
-              // Divider(height: 32),
-              // GetLocationWidget(),
-              // Divider(height: 32),
-              Container(),
-              // ListenLocationWidget(),
-              // ApiWidget(),
-              // Divider(height: 32),
-              // ChangeSettings(),
-              // Divider(height: 32),
-              // EnableInBackgroundWidget(),
-              // Divider(height: 32),
-              // ChangeNotificationWidget()
+              Expanded(
+                child: Center(
+                  child: Image.asset('assets/logo_white.png',
+                      height: 250, width: 260),
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Powered by Artistic Milliners",
+                          style: TextStyle(
+                            // remove this if don't have custom font
+                              fontSize: 10.0,
+                              // text size
+                              color: Colors.white,
+                              fontFamily: 'titlefont' // text color
+                          ),
+                        ),
+                        Text(
+                          "Copyright © 2021 All Rights Reserved",
+                          style: TextStyle(
+                            // remove this if don't have custom font
+                              fontSize: 10.0,
+                              // text size
+                              color: Colors.white,
+                              fontFamily: 'titlefont' // text color
+                          ),
+                        )
+                      ],
+                    )),
+              )
             ],
           ),
         ),

@@ -5,7 +5,7 @@ import 'dart:io';
 
 class BaseURL {
   // String Auth = 'https://art.artisticmilliners.com:8081/ords/art/apis/';
-  String Auth = 'https://art.artisticmilliners.com:8081/ords/art/';
+  String Auth = 'https://artlive.artisticmilliners.com:8081/ords/art/';
 }
 
 class postJSON {
