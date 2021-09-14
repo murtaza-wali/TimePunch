@@ -1,21 +1,19 @@
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
-import 'package:am_timepunch/change_settings.dart';
-import 'package:am_timepunch/enable_in_background.dart';
-
-
-import 'change_notification.dart';
-import 'get_location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'AccesskeyScreen.dart';
 import 'listen_location.dart';
-import 'permission_status.dart';
-import 'service_enabled.dart';
 
+int? initScreen = 0;
 
-void main() {
+Future<void> main() async {
   HttpOverrides.global = new MyHttpOverrides();
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  initScreen = (await prefs.getInt("initScreen"));
+  await prefs.setInt("initScreen", 1);
   runApp(MyApp());
 }
 
@@ -27,6 +25,7 @@ class MyHttpOverrides extends HttpOverrides {
           (X509Certificate cert, String host, int port) => true;
   }
 }
+
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
 
@@ -36,8 +35,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'TimePunch',
       theme: ThemeData.dark(
-        // primarySwatch:Colors.blue,
-      ),
+          // primarySwatch:Colors.blue,
+          ),
       home: const MyHomePage(title: 'TimePunch'),
     );
   }
@@ -53,66 +52,45 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final Location location = Location();
-  //
-  // Future<void> _showInfoDialog() {
-  //   return showDialog<void>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text('Time Punch'),
-  //         content: SingleChildScrollView(
-  //           child: ListBody(
-  //             children: <Widget>[
-  //               const Text('Welcome Taha Siddiqui'),
-  //               InkWell(
-  //                 child: const Text(
-  //                   'Artistic MIlliners',
-  //                   style: TextStyle(
-  //                     decoration: TextDecoration.underline,
-  //                   ),
-  //                 ),
-  //
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: const Text('Ok'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
+
+  @override
+  void initState() {
+    super.initState();
+    if (initScreen == null) {
+      new Future.delayed(const Duration(seconds: 3), () {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (BuildContext context) => Accesskey()),
+            (Route<dynamic> route) => false);
+      });
+    } else if (initScreen == 1) {
+      new Future.delayed(const Duration(seconds: 3), () {
+        //
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => ListenLocationWidget()),
+            (Route<dynamic> route) => false);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title!),
-        // actions: <Widget>[
-        //   IconButton(
-        //     icon: const Icon(Icons.info_outline),
-        //     onPressed: _showInfoDialog,
-        //   )63
-        // ],
-      ),
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(32),
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               // PermissionStatusWidget(),
               // Divider(height: 32),
               // ServiceEnabledWidget(),
               // Divider(height: 32),
               // GetLocationWidget(),
               // Divider(height: 32),
-              ListenLocationWidget(),
+              Container(),
+              // ListenLocationWidget(),
               // ApiWidget(),
               // Divider(height: 32),
               // ChangeSettings(),

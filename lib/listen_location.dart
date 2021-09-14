@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'package:am_timepunch/postAPI/postapi.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
+import 'package:minimize_app/minimize_app.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'LocalStorage/MySharedPref.dart';
 import 'Reuseable_Widgets/success_widget.dart';
 
 bool checked = false;
-var postChecked=false;
+var postChecked = false;
 
 var locLat = _ListenLocationState()._location?.latitude;
 var locLong = _ListenLocationState()._location?.longitude;
@@ -28,11 +33,12 @@ Future<http.Response> fetchLocation() async {
     return deviceresult;
   } else {
     checked = false;
-    am_location='Location not identified';
+    am_location = 'Location not identified';
   }
   checked = false;
   return deviceresult;
 }
+
 /*
 Future<http.Response> postAttendance() async {
   final response = Uri.parse(
@@ -75,12 +81,20 @@ class ListenLocationWidget extends StatefulWidget {
 
 class _ListenLocationState extends State<ListenLocationWidget> {
   final Location location = Location();
+
   // String am_location = '';
+  late String emplloyeecode;
 
   @override
   void initState() {
     _listenLocation();
     super.initState();
+
+    MySharedPreferences.instance
+        .getStringValue("empcode")
+        .then((name) => setState(() {
+              emplloyeecode = name;
+            }));
   }
 
   LocationData? _location;
@@ -92,12 +106,12 @@ class _ListenLocationState extends State<ListenLocationWidget> {
     _stopListen();
     // print('${_stopListen()}');
     setState(() {
-     // _stopListen();
+      // _stopListen();
       _locationSubscription = null;
       locLat = null;
       locLong = null;
-      checked=false;
-      am_location='Verifying Location';
+      checked = false;
+      am_location = 'Verifying Location';
     });
     _locationSubscription =
         location.onLocationChanged.handleError((dynamic err) {
@@ -118,7 +132,7 @@ class _ListenLocationState extends State<ListenLocationWidget> {
         locLong = _location?.longitude;
         fetchLocation().then((loc) {
           Map<String, dynamic> fetchLocation = jsonDecode(loc.body);
-          am_location = 'Welcome to '+ fetchLocation['location_name'];
+          am_location = 'Welcome to ' + fetchLocation['location_name'];
         });
         // print('Location name${am_location}');
         print('Loc Lat: ${locLat}' + 'Loc Long: ${locLat}');
@@ -134,8 +148,8 @@ class _ListenLocationState extends State<ListenLocationWidget> {
       _locationSubscription = null;
       locLat = null;
       locLong = null;
-      checked=false;
-      am_location='Location not identified';
+      checked = false;
+      am_location = 'Location not identified';
     });
   }
 
@@ -148,89 +162,171 @@ class _ListenLocationState extends State<ListenLocationWidget> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          '$am_location ',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headline4,
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Time Punch'),
+          // actions: <Widget>[
+          //   IconButton(
+          //     icon: const Icon(Icons.info_outline),
+          //     onPressed: _showInfoDialog,
+          //   )63
+          // ],
         ),
-        Divider(height: 32),
-        Text(
-          ' Latitude: ' +
-              ('${_location?.latitude}') +
-              '\n Longitude : ' +
-              ('${_location?.longitude}'),
-        ),
-        if (checked)
-          GestureDetector(
-              child: Container(
-                width: 220,
-                height: 300,
-                margin: const EdgeInsets.only(left: 50.0, top: 20.0),
-                decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.5),
-                        spreadRadius: 10,
-                        blurRadius: 5,
-                        offset: Offset(0, 0), // changes position of shadow
-                      ),
-                    ],
-                    color: Colors.green,
-                    borderRadius: BorderRadius.all(Radius.elliptical(200, 250)),
-                    image: DecorationImage(
-                        image: AssetImage("assets/fingerprintneon.png"),
-                        fit: BoxFit.cover)),
-                child: Container(),
-              ),
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                    builder: (context) =>  SuccessWidget()
+        body: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              children: <Widget>[
+                // PermissionStatusWidget(),
+                // Divider(height: 32),
+                // ServiceEnabledWidget(),
+                // Divider(height: 32),
+                // GetLocationWidget(),
+                // Divider(height: 32),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      '$am_location ',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headline4,
+                    ),
+                    Divider(height: 32),
+                    Text(
+                      ' Latitude: ' +
+                          ('${_location?.latitude}') +
+                          '\n Longitude : ' +
+                          ('${_location?.longitude}'),
+                    ),
+                    if (checked)
+                      GestureDetector(
+                          child: Container(
+                            width: 220,
+                            height: 300,
+                            margin:
+                                const EdgeInsets.only(left: 50.0, top: 20.0),
+                            decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.green.withOpacity(0.5),
+                                    spreadRadius: 10,
+                                    blurRadius: 5,
+                                    offset: Offset(
+                                        0, 0), // changes position of shadow
+                                  ),
+                                ],
+                                color: Colors.green,
+                                borderRadius: BorderRadius.all(
+                                    Radius.elliptical(200, 250)),
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        "assets/fingerprintneon.png"),
+                                    fit: BoxFit.cover)),
+                            child: Container(),
+                          ),
+                          onTap: () {
+                            // yahan post api ayegiii...
+                            postJSON()
+                                .PostemployeeAttendace(emplloyeecode)
+                                .then((value) {
+                              closeApp();
+                            });
+                            /*Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SuccessWidget()),
+                            );*/
+                          })
+                    else
+                      (Text(
+                        'Please reach your unit to mark attendance',
+                        style: Theme.of(context).textTheme.headline5,
+                      )),
+                    Row(
+                      children: <Widget>[
+                        Container(
+                          margin: const EdgeInsets.only(right: 42),
+                          //    child:
+                          //    startSearchButton()
+                        ),
+                        if (_locationSubscription != null) (stopSearchButton()),
+                        if (_locationSubscription == null)
+                          (startSearchButton()),
+                      ],
+                    ),
+                  ],
                 ),
-                );
-              })
-        else
-          (Text(
-            'Please reach your unit to mark attendance',
-            style: Theme.of(context).textTheme.headline5,
-          )),
-        Row(
-          children: <Widget>[
-            Container(
-              margin: const EdgeInsets.only(right: 42),
-          //    child:
-          //    startSearchButton()
+                // ListenLocationWidget(),
+                // ApiWidget(),
+                // Divider(height: 32),
+                // ChangeSettings(),
+                // Divider(height: 32),
+                // EnableInBackgroundWidget(),
+                // Divider(height: 32),
+                // ChangeNotificationWidget()
+              ],
             ),
-            if ( _locationSubscription != null) (
-            stopSearchButton()
-            ),
-            if ( _locationSubscription == null) (
-                startSearchButton()
-            ),
-          ],
-        ),
-      ],
-    );
+          ),
+        ));
+  }
+
+  void closeApp() {
+    if (Platform.isAndroid) {
+      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+    } else {
+      MinimizeApp.minimizeApp();
+    }
   }
 
   Widget stopSearchButton() {
-    return    ElevatedButton(
+    return ElevatedButton(
       child: const Text('Stop Searching'),
       onPressed: _locationSubscription != null ? _stopListen : null,
     );
   }
 
   Widget startSearchButton() {
-    return    ElevatedButton(
+    return ElevatedButton(
       child: const Text('Start Searching'),
       onPressed: _locationSubscription == null ? _listenLocation : null,
     );
+  }
+
+  confirmationPopup(
+      BuildContext dialogContext, String title, String msg, String okbtn) {
+    var alertStyle = AlertStyle(
+      animationType: AnimationType.grow,
+      overlayColor: Colors.black87,
+      isCloseButton: true,
+      isOverlayTapDismiss: true,
+      titleStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+      animationDuration: Duration(milliseconds: 400),
+    );
+
+    Alert(
+        context: dialogContext,
+        style: alertStyle,
+        title: title,
+        desc: msg,
+        buttons: [
+          DialogButton(
+            child: Text(
+              okbtn,
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          ListenLocationWidget()),
+                  (Route<dynamic> route) => false);
+            },
+            color: Colors.black,
+          ),
+        ]).show();
   }
 }

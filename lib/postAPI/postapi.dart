@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+
+class BaseURL {
+  // String Auth = 'https://art.artisticmilliners.com:8081/ords/art/apis/';
+  String Auth = 'https://art.artisticmilliners.com:8081/ords/art/';
+}
+
+class postJSON {
+  ///timepunch/add_device/:access_key/:device_id/:device_model/:device_os/:ip_address
+  Future<http.Response?> Postdevice(String access_key, String device_id,
+      String device_model, String device_os, String ip_address) async {
+    // Uri.parse must when you are passing URL.
+    var deviceURL = Uri.parse(BaseURL().Auth +
+        "timepunch/add_device/" +
+        access_key +
+        "/" +
+        device_id +
+        "/" +
+        device_model +
+        "/" +
+        device_os +
+        "/" +
+        ip_address.toString());
+    print('Device  url${deviceURL}');
+    var deviceresult = await http.post(deviceURL);
+    print('Device result${deviceresult.body}');
+    if (deviceresult.statusCode == 200) {
+      return deviceresult;
+    }
+  }
+
+  Future<http.Response?> PostemployeeAttendace(String employeecode) async {
+    // Uri.parse must when you are passing URL.
+    var deviceURL =
+        Uri.parse(BaseURL().Auth + "timepunch/submit/" + employeecode);
+    print('Device  url${deviceURL}');
+    var deviceresult = await http.post(deviceURL);
+    print('Device result${deviceresult.body}');
+    if (deviceresult.statusCode == 200) {
+      return deviceresult;
+    }
+  }
+}
