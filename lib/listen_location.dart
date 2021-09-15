@@ -242,14 +242,14 @@ class _ListenLocationState extends State<ListenLocationWidget>
                 fit: BoxFit.cover,
                 height: 30,
               ),
-              Text('canMockLocation():'),
+             /* Text('canMockLocation():'),
               SizedBox(
                 width: 8,
-              ),
-              Text(
+              ),*/
+             /* Text(
                 '${canMockLocation ? "Yes" : "No"}',
                 style: TextStyle(fontWeight: FontWeight.w600),
-              ),
+              ),*/
             ],
           ),
 
@@ -461,8 +461,8 @@ class _ListenLocationState extends State<ListenLocationWidget>
     var alertStyle = AlertStyle(
       animationType: AnimationType.grow,
       overlayColor: Colors.black87,
-      isCloseButton: true,
-      isOverlayTapDismiss: true,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
       titleStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
       animationDuration: Duration(milliseconds: 400),

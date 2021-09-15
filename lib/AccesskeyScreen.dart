@@ -190,10 +190,11 @@ class _AccesskeyState extends State<Accesskey> {
   ErrorPopup(
       BuildContext dialogContext, String title, String msg, String okbtn) {
     var alertStyle = AlertStyle(
+
       animationType: AnimationType.grow,
       overlayColor: Colors.black87,
-      isCloseButton: true,
-      isOverlayTapDismiss: true,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
       titleStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
       animationDuration: Duration(milliseconds: 400),
@@ -223,8 +224,8 @@ class _AccesskeyState extends State<Accesskey> {
     var alertStyle = AlertStyle(
       animationType: AnimationType.grow,
       overlayColor: Colors.black87,
-      isCloseButton: true,
-      isOverlayTapDismiss: true,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
       titleStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
       animationDuration: Duration(milliseconds: 400),
