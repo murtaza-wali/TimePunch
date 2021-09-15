@@ -83,7 +83,8 @@ class _AccesskeyState extends State<Accesskey> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Access Key'),
+        title: Text('\u{1F510} Access Key'),
+
       ),
       body: Align(
         alignment: Alignment.center,
@@ -104,8 +105,14 @@ class _AccesskeyState extends State<Accesskey> {
                     child: TextField(
                       controller: accessIdController,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFF09E812), width: 1.0),
+                        ),
+                        border: OutlineInputBorder(borderSide: const BorderSide(color: Colors.grey, width: 0.0),),
                         labelText: 'Access ID',
+                          labelStyle: TextStyle(
+                              color: Color(0xFF09E812),
+                          )
                       ),
                       onChanged: (accesstext) {
                         setState(() {});
@@ -116,7 +123,7 @@ class _AccesskeyState extends State<Accesskey> {
                     child: FlatButton(
                       color: Colors.white,
                       textColor: Colors.black,
-                      child: Text('Enter'),
+                      child: Text('Validate'),
                       onPressed: () {
                         setState(() {
                           // yahan api hit honi hai ....
@@ -161,7 +168,7 @@ class _AccesskeyState extends State<Accesskey> {
                                     'Successfully Registered!', 'OK');
                               } else if (status == 404) {
                                 ErrorPopup(context, 'Error',
-                                    'Enter Invalid Key!', 'OK');
+                                    'Invalid Key Entered !', 'OK');
                               }
                             });
                           }

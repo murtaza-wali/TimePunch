@@ -10,14 +10,15 @@ import 'package:location/location.dart';
 import 'package:minimize_app/minimize_app.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'LocalStorage/MySharedPref.dart';
-import 'Reuseable_Widgets/success_widget.dart';
+import 'package:safe_device/safe_device.dart';
 
 bool checked = false;
+bool canMockLocation = false;
 var postChecked = false;
 
 var locLat = _ListenLocationState()._location?.latitude;
 var locLong = _ListenLocationState()._location?.longitude;
-var ecode = '0106000280';
+
 
 String am_location = 'Verifying Location';
 
@@ -29,6 +30,7 @@ Future<http.Response> fetchLocation() async {
           '${locLong}');
   print('response: ${response}');
   var deviceresult = await http.get(response);
+
   if (deviceresult.statusCode == 200) {
     checked = true;
     return deviceresult;
@@ -112,10 +114,17 @@ class _ListenLocationState extends State<ListenLocationWidget> {
   List<AmLocation> amLocation = [];
 
   Future<void> _listenLocation() async {
-    _stopListen();
+    //_stopListen();
     // print('${_stopListen()}');
+    if (!mounted) return;
+    try {
+      canMockLocation = await SafeDevice.canMockLocation;
+    } catch (error) {
+      print(error);
+    }
     setState(() {
       // _stopListen();
+      canMockLocation = canMockLocation;
       _locationSubscription = null;
       locLat = null;
       locLong = null;
@@ -184,8 +193,17 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                 fit: BoxFit.cover,
                 height: 30,
               ),
+              Text('canMockLocation():'),
+              SizedBox(
+                width: 8,
+              ),
+              Text(
+                '${canMockLocation ? "Yes" : "No"}',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ],
           ),
+
           // actions: <Widget>[
           //   IconButton(
           //     icon: const Icon(Icons.info_outline),
@@ -226,12 +244,12 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                     style: TextStyle(color: Colors.white, fontSize: 35),
                   ),
                   Divider(height: 32),
-                  /*Text(
+                  Text(
                       ' Latitude: ' +
                           ('${_location?.latitude}') +
                           '\n Longitude : ' +
                           ('${_location?.longitude}'),
-                    ),*/
+                    ),
                   if (checked)
                     GestureDetector(
                         child: Container(
