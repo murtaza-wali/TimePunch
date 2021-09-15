@@ -19,7 +19,6 @@ var postChecked = false;
 var locLat = _ListenLocationState()._location?.latitude;
 var locLong = _ListenLocationState()._location?.longitude;
 
-
 String am_location = 'Verifying Location';
 
 Future<http.Response> fetchLocation() async {
@@ -82,7 +81,8 @@ class ListenLocationWidget extends StatefulWidget {
   _ListenLocationState createState() => _ListenLocationState();
 }
 
-class _ListenLocationState extends State<ListenLocationWidget> {
+class _ListenLocationState extends State<ListenLocationWidget>
+    with WidgetsBindingObserver {
   final Location location = Location();
 
   // String am_location = '';
@@ -91,9 +91,15 @@ class _ListenLocationState extends State<ListenLocationWidget> {
 
   @override
   void initState() {
-    _listenLocation();
+    _listenLocation().then((value) {
+      print('value is ${canMockLocation}');
+      if (canMockLocation) {
+        confirmationPopup(
+            context, "Sorry", ' You are using fake location.', 'OK');
+      }
+    });
     super.initState();
-
+    WidgetsBinding.instance!.addObserver(this);
     MySharedPreferences.instance
         .getStringValue("empcode")
         .then((code) => setState(() {
@@ -106,6 +112,47 @@ class _ListenLocationState extends State<ListenLocationWidget> {
               emplloyeename = name;
               print('employee emp_name ${emplloyeecode}');
             }));
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        onResumed();
+        break;
+      case AppLifecycleState.inactive:
+        onPaused();
+        break;
+      case AppLifecycleState.paused:
+        onInactive();
+        break;
+      case AppLifecycleState.detached:
+        onDetached();
+        break;
+    }
+  }
+
+  void onResumed() {
+    print('onResumed');
+    _listenLocation().then((value) {
+      print('value is ${canMockLocation}');
+      if (canMockLocation) {
+        confirmationPopup(
+            context, "Sorry", ' You are using a fake location.', 'OK');
+      }
+    });
+  }
+
+  void onPaused() {
+    print('onPaused');
+  }
+
+  void onInactive() {
+    print('onInactive');
+  }
+
+  void onDetached() {
+    print('onDetached');
   }
 
   LocationData? _location;
@@ -173,6 +220,8 @@ class _ListenLocationState extends State<ListenLocationWidget> {
 
   @override
   void dispose() {
+    print('check');
+    WidgetsBinding.instance!.removeObserver(this);
     _locationSubscription?.cancel();
     setState(() {
       _locationSubscription = null;
@@ -235,7 +284,8 @@ class _ListenLocationState extends State<ListenLocationWidget> {
               // Divider(height: 32),
               // GetLocationWidget(),
               // Divider(height: 32),
-          Expanded(child:Column(
+              Expanded(
+                  child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
@@ -245,11 +295,11 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                   ),
                   Divider(height: 32),
                   Text(
-                      ' Latitude: ' +
-                          ('${_location?.latitude}') +
-                          '\n Longitude : ' +
-                          ('${_location?.longitude}'),
-                    ),
+                    ' Latitude: ' +
+                        ('${_location?.latitude}') +
+                        '\n Longitude : ' +
+                        ('${_location?.longitude}'),
+                  ),
                   if (checked)
                     GestureDetector(
                         child: Container(
@@ -270,11 +320,11 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                                 ),
                               ],
                               color: Colors.green,
-                              borderRadius: BorderRadius.all(
-                                  Radius.elliptical(200, 250)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.elliptical(200, 250)),
                               image: DecorationImage(
-                                  image: AssetImage(
-                                      "assets/fingerprintneon.png"),
+                                  image:
+                                      AssetImage("assets/fingerprintneon.png"),
                                   fit: BoxFit.cover)),
                           child: Container(),
                         ),
@@ -317,11 +367,9 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                         ),
                       ],
                     ),
-
-
                 ],
               )),
-               Align(
+              Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
                     padding: EdgeInsets.all(0),
@@ -330,22 +378,22 @@ class _ListenLocationState extends State<ListenLocationWidget> {
                         Text(
                           "Powered by Artistic Milliners",
                           style: TextStyle(
-                            // remove this if don't have custom font
+                              // remove this if don't have custom font
                               fontSize: 10.0,
                               // text size
                               color: Colors.white,
                               fontFamily: 'titlefont' // text color
-                          ),
+                              ),
                         ),
                         Text(
                           "Copyright © 2021 All Rights Reserved",
                           style: TextStyle(
-                            // remove this if don't have custom font
+                              // remove this if don't have custom font
                               fontSize: 10.0,
                               // text size
                               color: Colors.white,
                               fontFamily: 'titlefont' // text color
-                          ),
+                              ),
                         )
                       ],
                     )),
@@ -396,15 +444,16 @@ class _ListenLocationState extends State<ListenLocationWidget> {
   Widget startSearchButton() {
     return Container(
       child: ElevatedButton(
-      child: const Text('Start Searching'),
-      style: ElevatedButton.styleFrom(
-        primary: Colors.green,
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        textStyle: TextStyle(
-            fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
+        child: const Text('Start Searching'),
+        style: ElevatedButton.styleFrom(
+          primary: Colors.green,
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          textStyle: TextStyle(
+              fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        onPressed: _locationSubscription == null ? _listenLocation : null,
       ),
-      onPressed: _locationSubscription == null ? _listenLocation : null,
-    ),);
+    );
   }
 
   confirmationPopup(

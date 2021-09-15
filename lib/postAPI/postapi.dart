@@ -47,7 +47,6 @@ class postJSON {
       descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
       animationDuration: Duration(milliseconds: 400),
     );
-
     Alert(
         context: dialogContext,
         style: alertStyle,
