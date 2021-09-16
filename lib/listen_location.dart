@@ -95,7 +95,8 @@ class _ListenLocationState extends State<ListenLocationWidget>
       print('value is ${canMockLocation}');
       if (canMockLocation) {
         confirmationPopup(
-            context, "Sorry", ' You are using fake location.', 'OK');
+            context, "Alert !", 'We have detected Fake Location application is enabled. \n'
+            'You cannot proceed until it is disabled.', 'OK');
       }
     });
     super.initState();
@@ -138,7 +139,10 @@ class _ListenLocationState extends State<ListenLocationWidget>
       print('value is ${canMockLocation}');
       if (canMockLocation) {
         confirmationPopup(
-            context, "Sorry", ' You are using a fake location.', 'OK');
+            context, "Alert !",
+            ' Hi, Please disable any fake location application before accessing TIME PUNCH.\n '
+                'Relaunch the APP after pressing OK button.'
+            , 'OK');
       }
     });
   }
