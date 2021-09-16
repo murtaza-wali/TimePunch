@@ -189,7 +189,6 @@ class _AccesskeyState extends State<Accesskey> {
   ErrorPopup(
       BuildContext dialogContext, String title, String msg, String okbtn) {
     var alertStyle = AlertStyle(
-
       animationType: AnimationType.grow,
       overlayColor: Colors.black87,
       isCloseButton: false,

@@ -12,9 +12,6 @@ int? initScreen = 0;
 Future<void> main() async {
   HttpOverrides.global = new MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
-  /* SharedPreferences prefs = await SharedPreferences.getInstance();
-  initScreen = (await prefs.getInt("initScreen"));
-  await prefs.setInt("initScreen", 1);*/
   MySharedPreferences.instance.setIntValue("initScreen", 1);
   runApp(MyApp());
 }
