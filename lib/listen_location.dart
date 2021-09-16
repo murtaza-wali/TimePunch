@@ -95,7 +95,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
       print('value is ${canMockLocation}');
       if (canMockLocation) {
         confirmationPopup(
-            context, "Alert !", 'We have detected Fake Location application is enabled. \n'
+            context, "Alert !", '. We have detected Fake Location application is enabled. \n'
             'You cannot proceed until it is disabled.', 'OK');
       }
     });
@@ -140,7 +140,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
       if (canMockLocation) {
         confirmationPopup(
             context, "Alert !",
-            ' Hi, Please disable any fake location application before accessing TIME PUNCH.\n '
+            ' . Please disable any fake location application before accessing TIME PUNCH.\n '
                 'Relaunch the APP after pressing OK button.'
             , 'OK');
       }
@@ -476,7 +476,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
         context: dialogContext,
         style: alertStyle,
         title: title,
-        desc: emplloyeename + msg,
+        desc: 'Hi, '+ emplloyeename + msg,
         buttons: [
           DialogButton(
             child: Text(
