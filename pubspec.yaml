@@ -35,6 +35,7 @@ dependencies:
   rflutter_alert: ^2.0.4
   get_ip: ^0.4.0
   minimize_app: ^0.1.1
+  restart_app: ^1.0.3
 
 
 dev_dependencies:

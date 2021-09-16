@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +12,10 @@ int? initScreen = 0;
 Future<void> main() async {
   HttpOverrides.global = new MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  /* SharedPreferences prefs = await SharedPreferences.getInstance();
   initScreen = (await prefs.getInt("initScreen"));
-  await prefs.setInt("initScreen", 1);
+  await prefs.setInt("initScreen", 1);*/
+  MySharedPreferences.instance.setIntValue("initScreen", 1);
   runApp(MyApp());
 }
 
@@ -59,39 +59,47 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-
-    if (initScreen == null) {
-      new Future.delayed(const Duration(seconds: 3), () {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (BuildContext context) => Accesskey()),
-            (Route<dynamic> route) => false);
-      });
-    } else if (initScreen == 1) {
-      MySharedPreferences.instance
-          .getStringValue("empcode")
-          .then((code) => setState(() {
-                emplloyeecode = code;
-                print('employee code ${emplloyeecode}');
-                if (emplloyeecode == '') {
-                  new Future.delayed(const Duration(seconds: 3), () {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => Accesskey()),
-                        (Route<dynamic> route) => false);
-                  });
-                } else {
-                  new Future.delayed(const Duration(seconds: 3), () {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => ListenLocationWidget()),
-                            (Route<dynamic> route) => false);
-                  });
-                }
-              }));
-      /*  print('employee code ${emplloyeecode}');
+    MySharedPreferences.instance
+        .getIntValue("initScreen")
+        .then((code) => setState(() {
+              initScreen = code;
+              print('initScreen:  ${initScreen}');
+              if (initScreen == 0) {
+                new Future.delayed(const Duration(seconds: 3), () {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => Accesskey()),
+                      (Route<dynamic> route) => false);
+                });
+              } else if (initScreen == 1) {
+                // MySharedPreferences.instance.setIntValue("initScreen", 2);
+                MySharedPreferences.instance
+                    .getStringValue("empcode")
+                    .then((code) => setState(() {
+                          emplloyeecode = code;
+                          print('employee code ${emplloyeecode}');
+                          if (emplloyeecode == '') {
+                            new Future.delayed(const Duration(seconds: 3), () {
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          Accesskey()),
+                                  (Route<dynamic> route) => false);
+                            });
+                          } else {
+                            new Future.delayed(const Duration(seconds: 3), () {
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          ListenLocationWidget()),
+                                  (Route<dynamic> route) => false);
+                            });
+                          }
+                        }));
+                /*  print('employee code ${emplloyeecode}');
       new Future.delayed(const Duration(seconds: 3), () {
         //
         Navigator.pushAndRemoveUntil(
@@ -100,7 +108,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 builder: (BuildContext context) => ListenLocationWidget()),
                 (Route<dynamic> route) => false);
       });*/
-    }
+              }
+            }));
   }
 
   @override
@@ -126,22 +135,22 @@ class _MyHomePageState extends State<MyHomePage> {
                         Text(
                           "Powered by Artistic Milliners",
                           style: TextStyle(
-                            // remove this if don't have custom font
+                              // remove this if don't have custom font
                               fontSize: 10.0,
                               // text size
                               color: Colors.white,
                               fontFamily: 'titlefont' // text color
-                          ),
+                              ),
                         ),
                         Text(
                           "Copyright © 2021 All Rights Reserved",
                           style: TextStyle(
-                            // remove this if don't have custom font
+                              // remove this if don't have custom font
                               fontSize: 10.0,
                               // text size
                               color: Colors.white,
                               fontFamily: 'titlefont' // text color
-                          ),
+                              ),
                         )
                       ],
                     )),

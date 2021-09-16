@@ -13,7 +13,6 @@ import 'DeviceInfo/DeviceOS.dart';
 import 'DeviceInfo/DeviceVersion.dart';
 import 'LocalStorage/MySharedPref.dart';
 import 'listen_location.dart';
-import 'main.dart';
 
 class Accesskey extends StatefulWidget {
   @override

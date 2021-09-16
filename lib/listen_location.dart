@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:am_timepunch/main.dart';
 import 'package:am_timepunch/postAPI/postapi.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 import 'package:minimize_app/minimize_app.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'LocalStorage/MySharedPref.dart';
 import 'package:safe_device/safe_device.dart';
@@ -88,17 +90,41 @@ class _ListenLocationState extends State<ListenLocationWidget>
   // String am_location = '';
   late String emplloyeecode;
   late String emplloyeename;
+  int? initScreen;
 
   @override
   void initState() {
-    _listenLocation().then((value) {
-      print('value is ${canMockLocation}');
-      if (canMockLocation) {
-        confirmationPopup(
-            context, "Alert !", '. We have detected Fake Location application is enabled. \n'
-            'You cannot proceed until it is disabled.', 'OK');
-      }
-    });
+    MySharedPreferences.instance
+        .getIntValue("initScreen")
+        .then((code) => setState(() {
+              initScreen = code;
+              print('initScreen:  ${initScreen}');
+              if (initScreen == 0) {
+                _listenLocation().then((value) {
+                  print('value is ${canMockLocation}');
+                  if (canMockLocation) {
+                    RelaunchconfirmationPopup(
+                        context,
+                        "Alert !",
+                        ' . Please disable any fake location application before accessing TIME PUNCH.\n '
+                            'Relaunch the APP after pressing OK button.',
+                        'OK');
+                  }
+                });
+              } else {
+                _listenLocation().then((value) {
+                  print('value is ${canMockLocation}');
+                  if (canMockLocation) {
+                    confirmationPopup(
+                        context,
+                        "Alert !",
+                        '. We have detected Fake Location application is enabled. \n'
+                            'You cannot proceed until it is disabled.',
+                        'OK');
+                  }
+                });
+              }
+            }));
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
     MySharedPreferences.instance
@@ -135,16 +161,37 @@ class _ListenLocationState extends State<ListenLocationWidget>
 
   void onResumed() {
     print('onResumed');
-    _listenLocation().then((value) {
-      print('value is ${canMockLocation}');
-      if (canMockLocation) {
-        confirmationPopup(
-            context, "Alert !",
-            ' . Please disable any fake location application before accessing TIME PUNCH.\n '
-                'Relaunch the APP after pressing OK button.'
-            , 'OK');
-      }
-    });
+    MySharedPreferences.instance
+        .getIntValue("initScreen")
+        .then((code) => setState(() {
+              initScreen = code;
+              print('initScreen:  ${initScreen}');
+              if (initScreen == 0) {
+                _listenLocation().then((value) {
+                  print('value is ${canMockLocation}');
+                  if (canMockLocation) {
+                    RelaunchconfirmationPopup(
+                        context,
+                        "Alert !",
+                        ' . Please disable any fake location application before accessing TIME PUNCH.\n '
+                            'Relaunch the APP after pressing OK button.',
+                        'OK');
+                  }
+                });
+              } else {
+                _listenLocation().then((value) {
+                  print('value is ${canMockLocation}');
+                  if (canMockLocation) {
+                    confirmationPopup(
+                        context,
+                        "Alert !",
+                        '. We have detected Fake Location application is enabled. \n'
+                            'You cannot proceed until it is disabled.',
+                        'OK');
+                  }
+                });
+              }
+            }));
   }
 
   void onPaused() {
@@ -246,11 +293,11 @@ class _ListenLocationState extends State<ListenLocationWidget>
                 fit: BoxFit.cover,
                 height: 30,
               ),
-             /* Text('canMockLocation():'),
+              /* Text('canMockLocation():'),
               SizedBox(
                 width: 8,
               ),*/
-             /* Text(
+              /* Text(
                 '${canMockLocation ? "Yes" : "No"}',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),*/
@@ -476,7 +523,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
         context: dialogContext,
         style: alertStyle,
         title: title,
-        desc: 'Hi, '+ emplloyeename + msg,
+        desc: 'Hi, ' + emplloyeename + msg,
         buttons: [
           DialogButton(
             child: Text(
@@ -485,6 +532,44 @@ class _ListenLocationState extends State<ListenLocationWidget>
             ),
             onPressed: () {
               closeApp();
+              /*Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          ListenLocationWidget()),
+                  (Route<dynamic> route) => false);*/
+            },
+            color: Colors.black,
+          ),
+        ]).show();
+  }
+
+  RelaunchconfirmationPopup(
+      BuildContext dialogContext, String title, String msg, String okbtn) {
+    var alertStyle = AlertStyle(
+      animationType: AnimationType.grow,
+      overlayColor: Colors.black87,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
+      titleStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+      animationDuration: Duration(milliseconds: 400),
+    );
+
+    Alert(
+        context: dialogContext,
+        style: alertStyle,
+        title: title,
+        desc: 'Hi, ' + emplloyeename + msg,
+        buttons: [
+          DialogButton(
+            child: Text(
+              okbtn,
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            onPressed: () {
+              // closeApp();
+              Restart.restartApp();
               /*Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
