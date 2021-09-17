@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:am_timepunch/main.dart';
+import 'package:am_timepunch/postAPI/getAPI.dart';
 import 'package:am_timepunch/postAPI/postapi.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
@@ -89,7 +90,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
 
   // String am_location = '';
   late String emplloyeecode;
-  late String emplloyeename;
+  late String emplloyeename, akey, isactive;
   int? initScreen;
 
   @override
@@ -139,6 +140,12 @@ class _ListenLocationState extends State<ListenLocationWidget>
               emplloyeename = name;
               print('employee emp_name ${emplloyeecode}');
             }));
+    MySharedPreferences.instance
+        .getStringValue("akey")
+        .then((name) => setState(() {
+              akey = name;
+              print('employee akey ${akey}');
+            }));
   }
 
   @override
@@ -161,37 +168,49 @@ class _ListenLocationState extends State<ListenLocationWidget>
 
   void onResumed() {
     print('onResumed');
-    MySharedPreferences.instance
-        .getIntValue("initScreen")
-        .then((code) => setState(() {
-              initScreen = code;
-              print('initScreen:  ${initScreen}');
-              if (initScreen == 0) {
-                _listenLocation().then((value) {
-                  print('value is ${canMockLocation}');
-                  if (canMockLocation) {
-                    RelaunchconfirmationPopup(
-                        context,
-                        "Alert !",
-                        ' . Please disable any fake location application before accessing TIME PUNCH.\n '
-                            'Relaunch the APP after pressing OK button.',
-                        'OK');
+    getApi().getAttendancePerfomance(akey).then((value) {
+      Map<String, dynamic> user = jsonDecode(value!.body);
+      isactive = user['isactive'];
+      if (isactive == "N") {
+        confirmationPopup(
+            context,
+            "Alert !",
+            '. Your Access Key is revoked . \n Please contact Administrator to validate your Access Key',
+            'OK');
+      } else if (isactive == "Y") {
+       /* MySharedPreferences.instance
+            .getIntValue("initScreen")
+            .then((code) => setState(() {
+                  initScreen = code;
+                  print('initScreen:  ${initScreen}');
+                  if (initScreen == 0) {
+                    _listenLocation().then((value) {
+                      print('value is ${canMockLocation}');
+                      if (canMockLocation) {
+                        RelaunchconfirmationPopup(
+                            context,
+                            "Alert !",
+                            ' . Please disable any fake location application before accessing TIME PUNCH.\n '
+                                'Relaunch the APP after pressing OK button.',
+                            'OK');
+                      }
+                    });
+                  } else {
+                    _listenLocation().then((value) {
+                      print('value is ${canMockLocation}');
+                      if (canMockLocation) {
+                        confirmationPopup(
+                            context,
+                            "Alert !",
+                            '. We have detected Fake Location application is enabled. \n'
+                                'You cannot proceed until it is disabled.',
+                            'OK');
+                      }
+                    });
                   }
-                });
-              } else {
-                _listenLocation().then((value) {
-                  print('value is ${canMockLocation}');
-                  if (canMockLocation) {
-                    confirmationPopup(
-                        context,
-                        "Alert !",
-                        '. We have detected Fake Location application is enabled. \n'
-                            'You cannot proceed until it is disabled.',
-                        'OK');
-                  }
-                });
-              }
-            }));
+                }));*/
+      }
+    });
   }
 
   void onPaused() {
