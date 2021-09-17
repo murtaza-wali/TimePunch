@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:am_timepunch/main.dart';
 import 'package:am_timepunch/postAPI/getAPI.dart';
 import 'package:am_timepunch/postAPI/postapi.dart';
+import 'package:am_timepunch/postAPI/validate_class.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:location/location.dart';
 import 'package:minimize_app/minimize_app.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'AccesskeyScreen.dart';
 import 'LocalStorage/MySharedPref.dart';
 import 'package:safe_device/safe_device.dart';
 
@@ -166,19 +168,27 @@ class _ListenLocationState extends State<ListenLocationWidget>
     }
   }
 
+  late List<Item> list;
+
   void onResumed() {
     print('onResumed');
-    getApi().getAttendancePerfomance(akey).then((value) {
-      Map<String, dynamic> user = jsonDecode(value!.body);
-      isactive = user['isactive'];
+    getApi().getvalidate(akey).then((value) {
+      list = value!;
+      isactive = list[0].isactive;
       if (isactive == "N") {
         confirmationPopup(
             context,
             "Alert !",
             '. Your Access Key is revoked . \n Please contact Administrator to validate your Access Key',
             'OK');
+      } else if (isactive == null) {
+        MySharedPreferences.instance.removeAll();
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (BuildContext context) => Accesskey()),
+            (Route<dynamic> route) => false);
       } else if (isactive == "Y") {
-       /* MySharedPreferences.instance
+        /* MySharedPreferences.instance
             .getIntValue("initScreen")
             .then((code) => setState(() {
                   initScreen = code;

@@ -1,17 +1,26 @@
+import 'dart:convert';
+
 import 'package:am_timepunch/postAPI/postapi.dart';
+import 'package:am_timepunch/postAPI/validate_class.dart';
 import 'package:http/http.dart' as http;
 
 class getApi {
-  Future<http.Response?> getAttendancePerfomance(String key) async {
-    //network request
-    // parse URI .....
-    var employeeImageURL =
+
+
+  Future<List<Item>?> getvalidate(String key) async {
+    // Uri.parse must when you are passing URL.
+    var validateURL =
         Uri.parse(BaseURL().Auth + "timepunch/validate/" + key.toString());
-    print('Result${employeeImageURL}');
-    final result = await http.get(employeeImageURL);
-    if (result.statusCode == 200) {
-      print('Result${result.body}');
-      return result;
+
+    final GPresult = await http.get(validateURL);
+
+    var parse = json.decode(GPresult.body);
+    var data = parse['items'] as List;
+    var GPmap = data.map<Item>((json) => Item.fromJson(json));
+    if (GPresult.statusCode == 200) {
+      return GPmap.toList();
+    }else{
+      return null;
     }
   }
 }
