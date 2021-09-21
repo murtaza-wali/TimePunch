@@ -1,4 +1,4 @@
-package com.example.am_timepunch
+package am.timepunch
 
 import io.flutter.embedding.android.FlutterActivity
 

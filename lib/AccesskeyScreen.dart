@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:am_timepunch/postAPI/postapi.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_ip/get_ip.dart';
@@ -41,6 +42,12 @@ class _AccesskeyState extends State<Accesskey> {
   @override
   void initState() {
     super.initState();
+    check().then((intenet) {
+      if (intenet != null && intenet) {
+      } else {
+        ErrorPopup(context, 'Connection Error', 'No Internet Connection', 'OK');
+      }
+    });
     progressDialog = new ProgressDialog(context);
     initPlatformState();
     getDeviceIdentifier().then((udid) {
@@ -83,7 +90,6 @@ class _AccesskeyState extends State<Accesskey> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text('\u{1F510} Access Key'),
-
       ),
       body: Align(
         alignment: Alignment.center,
@@ -104,15 +110,18 @@ class _AccesskeyState extends State<Accesskey> {
                     child: TextField(
                       controller: accessIdController,
                       decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF09E812), width: 1.0),
-                        ),
-                        border: OutlineInputBorder(borderSide: const BorderSide(color: Colors.grey, width: 0.0),),
-                        labelText: 'Access ID',
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Color(0xFF09E812), width: 1.0),
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.grey, width: 0.0),
+                          ),
+                          labelText: 'Access ID',
                           labelStyle: TextStyle(
-                              color: Color(0xFF09E812),
-                          )
-                      ),
+                            color: Color(0xFF09E812),
+                          )),
                       onChanged: (accesstext) {
                         setState(() {});
                       },
@@ -129,45 +138,44 @@ class _AccesskeyState extends State<Accesskey> {
                           if (accessIdController.text.isEmpty) {
                             ErrorPopup(context, 'Alert',
                                 'All fields are required', 'OK');
+                          } else {
+                            check().then((intenet) {
+                              if (intenet != null && intenet) {
+                                postJSON()
+                                    .Postdevice(accessIdController.text, _udid,
+                                        _model, _os, _ip, context)
+                                    .then((value) {
+                                  Map<String, dynamic> user =
+                                      jsonDecode(value!.body);
+                                  status = user['status'];
+                                  active = user['isactive'];
+                                  akey = user['akey'];
+                                  empcode = user['empcode'];
+                                  emp_name = user['emp_name'];
+                                  print('empcode${empcode}');
 
-                          }
-                          else {
-                            postJSON()
-                                .Postdevice(
-                              accessIdController.text,
-                              _udid,
-                              _model,
-                              _os,
-                              _ip,
-                              context
-                            )
-                                .then((value) {
-                              Map<String, dynamic> user =
-                                  jsonDecode(value!.body);
-                              status = user['status'];
-                              active = user['isactive'];
-                              akey = user['akey'];
-                              empcode = user['empcode'];
-                              emp_name = user['emp_name'];
-                              print('empcode${empcode}');
-
-                              if (status == 200) {
-                                print('status: ${status}');
-                                MySharedPreferences.instance
-                                    .setIntValue("status", status);
-                                MySharedPreferences.instance
-                                    .setStringValue("active", active);
-                                MySharedPreferences.instance
-                                    .setStringValue("akey", akey);
-                                MySharedPreferences.instance
-                                    .setStringValue("empcode", empcode);
-                                MySharedPreferences.instance
-                                    .setStringValue("emp_name", emp_name);
-                                confirmationPopup(context, 'Success',
-                                    'Successfully Registered!', 'OK');
-                              } else if (status == 404) {
-                                ErrorPopup(context, 'Error',
-                                    'Invalid Key Entered !', 'OK');
+                                  if (status == 200) {
+                                    print('status: ${status}');
+                                    MySharedPreferences.instance
+                                        .setIntValue("status", status);
+                                    MySharedPreferences.instance
+                                        .setStringValue("active", active);
+                                    MySharedPreferences.instance
+                                        .setStringValue("akey", akey);
+                                    MySharedPreferences.instance
+                                        .setStringValue("empcode", empcode);
+                                    MySharedPreferences.instance
+                                        .setStringValue("emp_name", emp_name);
+                                    confirmationPopup(context, 'Success',
+                                        'Successfully Registered!', 'OK');
+                                  } else if (status == 404) {
+                                    ErrorPopup(context, 'Error',
+                                        'Invalid Key Entered !', 'OK');
+                                  }
+                                });
+                              } else {
+                                ErrorPopup(context, 'Connection Error',
+                                    'No Internet Connection', 'OK');
                               }
                             });
                           }
@@ -184,6 +192,16 @@ class _AccesskeyState extends State<Accesskey> {
             )),
       ),
     );
+  }
+
+  Future<bool> check() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile) {
+      return true;
+    } else if (connectivityResult == ConnectivityResult.wifi) {
+      return true;
+    }
+    return false;
   }
 
   ErrorPopup(
