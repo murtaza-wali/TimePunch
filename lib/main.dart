@@ -1,11 +1,19 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:am_timepunch/postAPI/getAPI.dart';
+import 'package:am_timepunch/postAPI/version.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:launch_review/launch_review.dart';
 import 'package:location/location.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'AccesskeyScreen.dart';
+import 'DeviceInfo/APKReleaseVersion.dart';
+import 'Dialogboxes/ConfirmationPopup.dart';
 import 'LocalStorage/MySharedPref.dart';
 import 'listen_location.dart';
+import 'package:http/http.dart' as http;
 
 int? initScreen = 0;
 
@@ -52,10 +60,71 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final Location location = Location();
   late String emplloyeecode;
+  late List<Versionitem> versionList;
+  late String android_VersionNumber;
+  late int ios_VersionNumber;
+  late String BuildNumber;
+
+  Future<bool> check() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile) {
+      return true;
+    } else if (connectivityResult == ConnectivityResult.wifi) {
+      return true;
+    }
+    return false;
+  }
 
   @override
   void initState() {
     super.initState();
+    check().then((intenet) {
+      if (intenet != null && intenet) {
+        getApi().getVersionitem(context).then((users) {
+          setState(() {
+            versionList = users!;
+            if (versionList.length == 0) {
+            } else {
+              getAPKBuildNum().then((value) {
+                BuildNumber = value;
+                if (Platform.isAndroid) {
+                  android_VersionNumber = versionList.first.apkVersion;
+                  print('Build android ${BuildNumber}');
+                  // Android 9 (SDK 28), Xiaomi Redmi Note 7
+                  if (int.parse(BuildNumber) >=
+                      int.parse(android_VersionNumber)) {
+                    print(
+                        'Build android ${BuildNumber} / ${android_VersionNumber}');
+                    InitStateMain();
+                  } else {
+                    print(
+                        'Build123 android ${BuildNumber} / ${android_VersionNumber}');
+                    ErrorPopup(context);
+                  }
+                }
+                if (Platform.isIOS) {
+                  ios_VersionNumber = versionList.first.iosVersion;
+                  // iOS 13.1, iPhone 11 Pro Max iPhone
+                  if (int.parse(BuildNumber) >= ios_VersionNumber) {
+                    print('Build ios ${BuildNumber}/${ios_VersionNumber}');
+                    InitStateMain();
+                  } else {
+                    print('Build123 ios ${BuildNumber}/${ios_VersionNumber}');
+                    ErrorPopup(context);
+                  }
+                }
+              });
+            }
+          });
+        });
+      } else {
+        confirmationPopup(
+            context, 'Connection Error', 'No Internet Connection', 'OK', '');
+      }
+    });
+  }
+
+  InitStateMain() {
     MySharedPreferences.instance
         .getIntValue("initScreen")
         .then((code) => setState(() {
@@ -157,5 +226,38 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  ErrorPopup(BuildContext dialogContext) {
+    var alertStyle = AlertStyle(
+      animationType: AnimationType.grow,
+      overlayColor: Colors.black87,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
+      titleStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+      animationDuration: Duration(milliseconds: 400),
+    );
+    Alert(
+        context: dialogContext,
+        style: alertStyle,
+        title: 'Update App?',
+        desc:
+            'A new version of Time Punch available. Would You like to update it now?',
+        buttons: [
+          DialogButton(
+            child: Text(
+              'Update',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            onPressed: () {
+              LaunchReview.launch(
+                androidAppId: "am.timepunch",
+                iOSAppId: "",
+              );
+            },
+            color: Colors.black,
+          ),
+        ]).show();
   }
 }

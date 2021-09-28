@@ -4,14 +4,16 @@ import 'package:am_timepunch/postAPI/postapi.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get_ip/get_ip.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import 'DeviceInfo/APKReleaseVersion.dart';
 import 'DeviceInfo/DeviceIdentifier.dart';
 import 'DeviceInfo/DeviceModel.dart';
 import 'DeviceInfo/DeviceOS.dart';
 import 'DeviceInfo/DeviceVersion.dart';
+import 'Dialogboxes/ConfirmationPopup.dart';
 import 'LocalStorage/MySharedPref.dart';
 import 'listen_location.dart';
 
@@ -31,7 +33,8 @@ class _AccesskeyState extends State<Accesskey> {
       _value,
       emp_name,
       empcode,
-      akey;
+      akey,
+      releaseversion;
   bool firsttime = false;
   late int val;
   TextEditingController accessIdController = TextEditingController();
@@ -45,11 +48,15 @@ class _AccesskeyState extends State<Accesskey> {
     check().then((intenet) {
       if (intenet != null && intenet) {
       } else {
-        ErrorPopup(context, 'Connection Error', 'No Internet Connection', 'OK');
+        confirmationPopupwithoutEmployeeName(
+            context, 'Connection Error', 'No Internet Connection', 'OK');
       }
     });
     progressDialog = new ProgressDialog(context);
-    initPlatformState();
+    initPlatformState().then((value) {
+      _ip = value;
+      print('_ip: ${_ip}');
+    });
     getDeviceIdentifier().then((udid) {
       _udid = udid;
       print('UDID: ${_udid}');
@@ -66,22 +73,26 @@ class _AccesskeyState extends State<Accesskey> {
       _version = version!;
       print('_version: ${_version}');
     });
+    getAPKReleaseVersion().then((relversion) {
+      releaseversion = relversion;
+      print('Release version: ${releaseversion}');
+    });
   }
 
-  Future<void> initPlatformState() async {
+//Upgrading Flutter to 2.6.0-5.2.pre from 2.2.2 in C:\flutter...
+  Future<String> initPlatformState() async {
     String ipAddress;
+    final info = NetworkInfo();
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      ipAddress = await GetIp.ipAddress;
+      ipAddress = (await info.getWifiIP())!;
+      print('IP ADDRESS: ${ipAddress}');
     } on PlatformException {
       ipAddress = 'Failed to get ipAddress.';
     }
-    if (!mounted) return;
+    if (!mounted) return '';
 
-    setState(() {
-      _ip = ipAddress;
-      print('IP Address: ${_ip}');
-    });
+    return ipAddress;
   }
 
   @override
@@ -174,8 +185,11 @@ class _AccesskeyState extends State<Accesskey> {
                                   }
                                 });
                               } else {
-                                ErrorPopup(context, 'Connection Error',
-                                    'No Internet Connection', 'OK');
+                                confirmationPopupwithoutEmployeeName(
+                                    context,
+                                    'Connection Error',
+                                    'No Internet Connection',
+                                    'OK');
                               }
                             });
                           }
@@ -202,37 +216,6 @@ class _AccesskeyState extends State<Accesskey> {
       return true;
     }
     return false;
-  }
-
-  ErrorPopup(
-      BuildContext dialogContext, String title, String msg, String okbtn) {
-    var alertStyle = AlertStyle(
-      animationType: AnimationType.grow,
-      overlayColor: Colors.black87,
-      isCloseButton: false,
-      isOverlayTapDismiss: false,
-      titleStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-      descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-      animationDuration: Duration(milliseconds: 400),
-    );
-
-    Alert(
-        context: dialogContext,
-        style: alertStyle,
-        title: title,
-        desc: msg,
-        buttons: [
-          DialogButton(
-            child: Text(
-              okbtn,
-              style: TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            color: Colors.black,
-          ),
-        ]).show();
   }
 
   confirmationPopup(
@@ -265,6 +248,37 @@ class _AccesskeyState extends State<Accesskey> {
                       builder: (BuildContext context) =>
                           ListenLocationWidget()),
                   (Route<dynamic> route) => false);
+            },
+            color: Colors.black,
+          ),
+        ]).show();
+  }
+
+  ErrorPopup(
+      BuildContext dialogContext, String title, String msg, String okbtn) {
+    var alertStyle = AlertStyle(
+      animationType: AnimationType.grow,
+      overlayColor: Colors.black87,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
+      titleStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+      animationDuration: Duration(milliseconds: 400),
+    );
+
+    Alert(
+        context: dialogContext,
+        style: alertStyle,
+        title: title,
+        desc: msg,
+        buttons: [
+          DialogButton(
+            child: Text(
+              okbtn,
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
             },
             color: Colors.black,
           ),

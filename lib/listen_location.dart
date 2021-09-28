@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:am_timepunch/main.dart';
 import 'package:am_timepunch/postAPI/currenttime_class.dart';
 import 'package:am_timepunch/postAPI/getAPI.dart';
@@ -12,12 +11,13 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
-import 'package:minimize_app/minimize_app.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'DeviceInfo/APKReleaseVersion.dart';
+import 'Dialogboxes/ConfirmationPopup.dart';
 import 'LocalStorage/MySharedPref.dart';
 import 'package:safe_device/safe_device.dart';
-
 
 bool checked = false;
 bool canMockLocation = false;
@@ -30,7 +30,7 @@ String am_location = 'Verifying Location';
 
 Future<http.Response> fetchLocation() async {
   final response = Uri.parse(
-      'https://35.168.134.177:8085/ords/app/geo/location/' +
+      'https://apps.artisticmilliners.com:8085/ords/app/geo/location/' +
           '${locLat}' +
           '/' +
           '${locLong}');
@@ -98,6 +98,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
   int? initScreen;
   List<CurrentTimeitem> timeList = [];
   late String currenttime = 'Loading...';
+  late String ip;
 
   loadTime() async {
     getApi().getCurrentTime(context).then((users) {
@@ -120,6 +121,8 @@ class _ListenLocationState extends State<ListenLocationWidget>
     }
     return false;
   }
+
+  late String BuildNumber;
 
   @override
   void initState() {
@@ -150,6 +153,14 @@ class _ListenLocationState extends State<ListenLocationWidget>
                         .then((name) => setState(() {
                               akey = name;
                               print('employee akey ${akey}');
+                              getAPKBuildNum().then((value) {
+                                BuildNumber = value;
+                                print('aBuildNumberkey ${BuildNumber}');
+                                postJSON()
+                                    .postversion_chk(context, akey, BuildNumber)
+                                    .then((value) {});
+                              });
+
                               getApi().getvalidate(context, akey).then((value) {
                                 list = value!;
                                 isactive = list[0].isactive;
@@ -159,7 +170,8 @@ class _ListenLocationState extends State<ListenLocationWidget>
                                       context,
                                       "Alert !",
                                       '. Your Access Key is revoked . \n Please contact Administrator to validate your Access Key',
-                                      'OK');
+                                      'OK',
+                                      emplloyeename);
                                 } else if (isactive == null) {
                                   MySharedPreferences.instance.removeAll();
                                   Navigator.pushAndRemoveUntil(
@@ -197,7 +209,8 @@ class _ListenLocationState extends State<ListenLocationWidget>
                                                       "Alert !",
                                                       '. We have detected Fake Location application is enabled. \n'
                                                           'You cannot proceed until it is disabled.',
-                                                      'OK');
+                                                      'OK',
+                                                      emplloyeename);
                                                 }
                                               });
                                             }
@@ -219,11 +232,16 @@ class _ListenLocationState extends State<ListenLocationWidget>
                   }
                 }));
       } else {
-        ErrorPopup(context, 'Connection Error', 'No Internet Connection', 'OK');
+        confirmationPopupwithoutEmployeeName(
+            context, 'Connection Error', 'No Internet Connection', 'OK');
       } // No-Internet Case
     });
 
     super.initState();
+    initPlatformState().then((value) {
+      ip = value;
+      print('_ip: ${ip}');
+    });
     WidgetsBinding.instance!.addObserver(this);
     MySharedPreferences.instance
         .getStringValue("empcode")
@@ -291,7 +309,10 @@ class _ListenLocationState extends State<ListenLocationWidget>
 
   void onResumed() {
     print('onResumed');
-    getApi().getvalidate(context, akey).then((value) {
+    Restart.restartApp();
+    /*initState();*/
+
+    /*   getApi().getvalidate(context, akey).then((value) {
       list = value!;
       isactive = list[0].isactive;
       if (isactive == "N") {
@@ -300,7 +321,8 @@ class _ListenLocationState extends State<ListenLocationWidget>
             context,
             "Alert !",
             '. Your Access Key is revoked . \n Please contact Administrator to validate your Access Key',
-            'OK');
+            'OK',
+            emplloyeename);
       } else if (isactive == null) {
         MySharedPreferences.instance.removeAll();
         Navigator.pushAndRemoveUntil(
@@ -308,7 +330,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
             MaterialPageRoute(builder: (BuildContext context) => MyApp()),
             (Route<dynamic> route) => false);
       } else if (isactive == "Y") {
-        /* MySharedPreferences.instance
+        MySharedPreferences.instance
             .getIntValue("initScreen")
             .then((code) => setState(() {
                   initScreen = code;
@@ -334,13 +356,14 @@ class _ListenLocationState extends State<ListenLocationWidget>
                             "Alert !",
                             '. We have detected Fake Location application is enabled. \n'
                                 'You cannot proceed until it is disabled.',
-                            'OK');
+                            'OK',
+                            emplloyeename);
                       }
                     });
                   }
-                }));*/
+                }));
       }
-    });
+    });*/
   }
 
   void onPaused() {
@@ -355,6 +378,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
     print('onDetached');
   }
 
+  late int org_id;
   LocationData? _location;
   StreamSubscription<LocationData>? _locationSubscription;
   String? _error;
@@ -398,6 +422,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
         fetchLocation().then((loc) {
           Map<String, dynamic> fetchLocation = jsonDecode(loc.body);
           am_location = 'Welcome to ' + fetchLocation['location_name'];
+          org_id = fetchLocation['org_id'];
         });
         // print('Location name${am_location}');
         print('Loc Lat: ${locLat}' + 'Loc Long: ${locLat}');
@@ -416,6 +441,21 @@ class _ListenLocationState extends State<ListenLocationWidget>
       checked = false;
       am_location = 'Location not identified';
     });
+  }
+
+  Future<String> initPlatformState() async {
+    String ipAddress;
+    final info = NetworkInfo();
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      ipAddress = (await info.getWifiIP())!;
+      print('IP ADDRESS: ${ipAddress}');
+    } on PlatformException {
+      ipAddress = 'Failed to get ipAddress.';
+    }
+    if (!mounted) return '';
+
+    return ipAddress;
   }
 
   @override
@@ -531,13 +571,29 @@ class _ListenLocationState extends State<ListenLocationWidget>
                         ),
                         onTap: () {
                           // yahan post api ayegiii...
-                          postJSON()
-                              .PostemployeeAttendace(context, emplloyeecode)
-                              .then((value) {
-                            print('post : ${value}');
-                            confirmationPopup(context, "Thank you",
-                                ' your attendance have been marked', 'OK');
+                          check().then((intenet) {
+                            if (intenet != null && intenet) {
+                              postJSON()
+                                  .PostemployeeAttendace(
+                                      context, emplloyeecode, org_id, ip, akey)
+                                  .then((value) {
+                                print('post : ${value}');
+                                confirmationPopup(
+                                    context,
+                                    "Thank you",
+                                    ' your attendance have been marked',
+                                    'OK',
+                                    emplloyeename);
+                              });
+                            } else {
+                              confirmationPopupwithoutEmployeeName(
+                                  context,
+                                  'Connection Error',
+                                  'No Internet Connection',
+                                  'OK');
+                            }
                           });
+
                           /* Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -613,14 +669,6 @@ class _ListenLocationState extends State<ListenLocationWidget>
         ));
   }
 
-  void closeApp() {
-    if (Platform.isAndroid) {
-      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-    } else {
-      MinimizeApp.minimizeApp();
-    }
-  }
-
   stopsearch() {
     _locationSubscription != null ? _stopListen : null;
   }
@@ -655,43 +703,6 @@ class _ListenLocationState extends State<ListenLocationWidget>
         onPressed: _locationSubscription == null ? _listenLocation : null,
       ),
     );
-  }
-
-  confirmationPopup(
-      BuildContext dialogContext, String title, String msg, String okbtn) {
-    var alertStyle = AlertStyle(
-      animationType: AnimationType.grow,
-      overlayColor: Colors.black87,
-      isCloseButton: false,
-      isOverlayTapDismiss: false,
-      titleStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-      descStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-      animationDuration: Duration(milliseconds: 400),
-    );
-
-    Alert(
-        context: dialogContext,
-        style: alertStyle,
-        title: title,
-        desc: 'Hi, ' + emplloyeename + msg,
-        buttons: [
-          DialogButton(
-            child: Text(
-              okbtn,
-              style: TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            onPressed: () {
-              closeApp();
-              /*Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          ListenLocationWidget()),
-                  (Route<dynamic> route) => false);*/
-            },
-            color: Colors.black,
-          ),
-        ]).show();
   }
 
   RelaunchconfirmationPopup(
