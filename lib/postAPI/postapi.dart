@@ -119,28 +119,31 @@ class postJSON {
   }
 
 //https://art.artisticmilliners.com:8081/ords/art/timepunch/version_chk/:akey/:app_version
-  Future<http.Response?> postversion_chk(context, String accessKey,String AppVersion) async {
+  Future<http.Response?> postversion_chk(
+      context, String accessKey, String AppVersion) async {
     // Uri.parse must when you are passing URL.
     try {
       var deviceURL = Uri.parse(BaseURL().Auth +
           "timepunch/version_chk" +
           accessKey +
           "/" +
-          AppVersion.toString()
-        );
+          AppVersion.toString());
       print('employeecode  url231${deviceURL}');
       print('accessKey  url231${accessKey}');
       var deviceresult = await http.post(deviceURL);
       print('Device result231${deviceresult.body}');
       if (deviceresult.statusCode == 200) {
         return deviceresult;
+      } else {
+        ErrorPopup(context, 'Error', 'Bad request error!', 'OK');
       }
     } on SocketException catch (e) {
       throw ErrorPopup(
           context, 'Socket Exception', 'Check Internet Connectivity ', 'OK');
     }
   }
- Future<http.Response?> PostemployeeAttendace(context, String employeecode,
+
+  Future<http.Response?> PostemployeeAttendace(context, String employeecode,
       int org_id, String ipAddress, String accessKey) async {
     // Uri.parse must when you are passing URL.
     try {
@@ -160,6 +163,8 @@ class postJSON {
       print('Device result231${deviceresult.body}');
       if (deviceresult.statusCode == 200) {
         return deviceresult;
+      } else {
+        ErrorPopup(context, 'Error', 'Bad request error!', 'OK');
       }
     } on SocketException catch (e) {
       throw ErrorPopup(

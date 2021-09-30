@@ -5,7 +5,6 @@ import 'package:am_timepunch/postAPI/currenttime_class.dart';
 import 'package:am_timepunch/postAPI/getAPI.dart';
 import 'package:am_timepunch/postAPI/postapi.dart';
 import 'package:am_timepunch/postAPI/validate_class.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -14,6 +13,7 @@ import 'package:location/location.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'Connectivity/ReUseConnectivity.dart';
 import 'DeviceInfo/APKReleaseVersion.dart';
 import 'Dialogboxes/ConfirmationPopup.dart';
 import 'LocalStorage/MySharedPref.dart';
@@ -112,110 +112,93 @@ class _ListenLocationState extends State<ListenLocationWidget>
     });
   }
 
-  Future<bool> check() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.mobile) {
-      return true;
-    } else if (connectivityResult == ConnectivityResult.wifi) {
-      return true;
-    }
-    return false;
-  }
-
   late String BuildNumber;
 
   @override
   void initState() {
-    check().then((intenet) {
-      if (intenet != null && intenet) {
-        // Internet Present Case
-        Timer.periodic(Duration(seconds: 5), (_) => loadTime());
-        MySharedPreferences.instance
-            .getIntValue("initScreen")
-            .then((code) => setState(() {
-                  initScreen = code;
-                  print('initScreen:  ${initScreen}');
-                  if (initScreen == 0) {
-                    _listenLocation().then((value) {
-                      print('value is ${canMockLocation}');
-                      if (canMockLocation) {
-                        RelaunchconfirmationPopup(
-                            context,
-                            "Alert !",
-                            ' . Please disable any fake location application before accessing TIME PUNCH.\n '
-                                'Relaunch the APP after pressing OK button.',
-                            'OK');
-                      }
-                    });
-                  } else {
-                    MySharedPreferences.instance
-                        .getStringValue("akey")
-                        .then((name) => setState(() {
-                              akey = name;
-                              print('employee akey ${akey}');
-                              getAPKBuildNum().then((value) {
-                                BuildNumber = value;
-                                print('aBuildNumberkey ${BuildNumber}');
-                                postJSON()
-                                    .postversion_chk(context, akey, BuildNumber)
-                                    .then((value) {});
-                              });
+    Timer.periodic(Duration(seconds: 5), (_) => loadTime());
+    MySharedPreferences.instance.getIntValue("initScreen").then((code) =>
+        setState(() {
+          initScreen = code;
+          print('initScreen:  ${initScreen}');
+          if (initScreen == 0) {
+            _listenLocation().then((value) {
+              print('value is ${canMockLocation}');
+              if (canMockLocation) {
+                RelaunchconfirmationPopup(
+                    context,
+                    "Alert !",
+                    ' . Please disable any fake location application before accessing TIME PUNCH.\n '
+                        'Relaunch the APP after pressing OK button.',
+                    'OK');
+              }
+            });
+          } else {
+            MySharedPreferences.instance
+                .getStringValue("akey")
+                .then((name) => setState(() {
+                      akey = name;
+                      print('employee akey ${akey}');
+                      getAPKBuildNum().then((value) {
+                        BuildNumber = value;
+                        print('aBuildNumberkey ${BuildNumber}');
+                        postJSON()
+                            .postversion_chk(context, akey, BuildNumber)
+                            .then((value) {});
+                      });
 
-                              getApi().getvalidate(context, akey).then((value) {
-                                list = value!;
-                                isactive = list[0].isactive;
-                                if (isactive == "N") {
-                                  MySharedPreferences.instance.removeAll();
-                                  confirmationPopup(
-                                      context,
-                                      "Alert !",
-                                      '. Your Access Key is revoked . \n Please contact Administrator to validate your Access Key',
-                                      'OK',
-                                      emplloyeename);
-                                } else if (isactive == null) {
-                                  MySharedPreferences.instance.removeAll();
-                                  Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              MyApp()),
-                                      (Route<dynamic> route) => false);
-                                } else if (isactive == "Y") {
-                                  MySharedPreferences.instance
-                                      .getIntValue("initScreen")
-                                      .then((code) => setState(() {
-                                            initScreen = code;
-                                            print('initScreen:  ${initScreen}');
-                                            if (initScreen == 0) {
-                                              _listenLocation().then((value) {
-                                                print(
-                                                    'value is ${canMockLocation}');
-                                                if (canMockLocation) {
-                                                  RelaunchconfirmationPopup(
-                                                      context,
-                                                      "Alert !",
-                                                      ' . Please disable any fake location application before accessing TIME PUNCH.\n '
-                                                          'Relaunch the APP after pressing OK button.',
-                                                      'OK');
-                                                }
-                                              });
-                                            } else {
-                                              _listenLocation().then((value) {
-                                                print(
-                                                    'value is ${canMockLocation}');
-                                                if (canMockLocation) {
-                                                  confirmationPopup(
-                                                      context,
-                                                      "Alert !",
-                                                      '. We have detected Fake Location application is enabled. \n'
-                                                          'You cannot proceed until it is disabled.',
-                                                      'OK',
-                                                      emplloyeename);
-                                                }
-                                              });
-                                            }
-                                          }));
-                                  /*_listenLocation().then((value) {
+                      getApi().getvalidate(context, akey).then((value) {
+                        list = value!;
+                        isactive = list[0].isactive;
+                        if (isactive == "N") {
+                          MySharedPreferences.instance.removeAll();
+                          confirmationPopup(
+                              context,
+                              "Alert !",
+                              '. Your Access Key is revoked . \n Please contact Administrator to validate your Access Key',
+                              'OK',
+                              emplloyeename);
+                        } else if (isactive == null) {
+                          MySharedPreferences.instance.removeAll();
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) => MyApp()),
+                              (Route<dynamic> route) => false);
+                        } else if (isactive == "Y") {
+                          MySharedPreferences.instance
+                              .getIntValue("initScreen")
+                              .then((code) => setState(() {
+                                    initScreen = code;
+                                    print('initScreen:  ${initScreen}');
+                                    if (initScreen == 0) {
+                                      _listenLocation().then((value) {
+                                        print('value is ${canMockLocation}');
+                                        if (canMockLocation) {
+                                          RelaunchconfirmationPopup(
+                                              context,
+                                              "Alert !",
+                                              ' . Please disable any fake location application before accessing TIME PUNCH.\n '
+                                                  'Relaunch the APP after pressing OK button.',
+                                              'OK');
+                                        }
+                                      });
+                                    } else {
+                                      _listenLocation().then((value) {
+                                        print('value is ${canMockLocation}');
+                                        if (canMockLocation) {
+                                          confirmationPopup(
+                                              context,
+                                              "Alert !",
+                                              '. We have detected Fake Location application is enabled. \n'
+                                                  'You cannot proceed until it is disabled.',
+                                              'OK',
+                                              emplloyeename);
+                                        }
+                                      });
+                                    }
+                                  }));
+                          /*_listenLocation().then((value) {
                                 print('value is ${canMockLocation}');
                                 if (canMockLocation) {
                                   confirmationPopup(
@@ -226,16 +209,11 @@ class _ListenLocationState extends State<ListenLocationWidget>
                                       'OK');
                                 }
                               });*/
-                                }
-                              });
-                            }));
-                  }
-                }));
-      } else {
-        confirmationPopupwithoutEmployeeName(
-            context, 'Connection Error', 'No Internet Connection', 'OK');
-      } // No-Internet Case
-    });
+                        }
+                      });
+                    }));
+          }
+        }));
 
     super.initState();
     initPlatformState().then((value) {
@@ -514,7 +492,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
             )
           ],*/
         ),
-        body: Container(
+        body: ReuseOffline().getoffline(Container(
           padding: const EdgeInsets.all(32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,27 +549,17 @@ class _ListenLocationState extends State<ListenLocationWidget>
                         ),
                         onTap: () {
                           // yahan post api ayegiii...
-                          check().then((intenet) {
-                            if (intenet != null && intenet) {
-                              postJSON()
-                                  .PostemployeeAttendace(
-                                      context, emplloyeecode, org_id, ip, akey)
-                                  .then((value) {
-                                print('post : ${value}');
-                                confirmationPopup(
-                                    context,
-                                    "Thank you",
-                                    ' your attendance have been marked',
-                                    'OK',
-                                    emplloyeename);
-                              });
-                            } else {
-                              confirmationPopupwithoutEmployeeName(
-                                  context,
-                                  'Connection Error',
-                                  'No Internet Connection',
-                                  'OK');
-                            }
+                          postJSON()
+                              .PostemployeeAttendace(
+                                  context, emplloyeecode, org_id, ip, akey)
+                              .then((value) {
+                            print('post : ${value}');
+                            confirmationPopup(
+                                context,
+                                "Thank you",
+                                ' your attendance have been marked',
+                                'OK',
+                                emplloyeename);
                           });
 
                           /* Navigator.push(
@@ -666,7 +634,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
               // ChangeNotificationWidget()
             ],
           ),
-        ));
+        )));
   }
 
   stopsearch() {

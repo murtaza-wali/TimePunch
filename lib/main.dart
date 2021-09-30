@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:am_timepunch/postAPI/getAPI.dart';
 import 'package:am_timepunch/postAPI/version.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:location/location.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'AccesskeyScreen.dart';
+import 'Connectivity/ReUseConnectivity.dart';
 import 'DeviceInfo/APKReleaseVersion.dart';
 import 'Dialogboxes/ConfirmationPopup.dart';
 import 'LocalStorage/MySharedPref.dart';
@@ -65,62 +65,45 @@ class _MyHomePageState extends State<MyHomePage> {
   late int ios_VersionNumber;
   late String BuildNumber;
 
-  Future<bool> check() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.mobile) {
-      return true;
-    } else if (connectivityResult == ConnectivityResult.wifi) {
-      return true;
-    }
-    return false;
-  }
-
   @override
   void initState() {
     super.initState();
-    check().then((intenet) {
-      if (intenet != null && intenet) {
-        getApi().getVersionitem(context).then((users) {
-          setState(() {
-            versionList = users!;
-            if (versionList.length == 0) {
-            } else {
-              getAPKBuildNum().then((value) {
-                BuildNumber = value;
-                if (Platform.isAndroid) {
-                  android_VersionNumber = versionList.first.apkVersion;
-                  print('Build android ${BuildNumber}');
-                  // Android 9 (SDK 28), Xiaomi Redmi Note 7
-                  if (int.parse(BuildNumber) >=
-                      int.parse(android_VersionNumber)) {
-                    print(
-                        'Build android ${BuildNumber} / ${android_VersionNumber}');
-                    InitStateMain();
-                  } else {
-                    print(
-                        'Build123 android ${BuildNumber} / ${android_VersionNumber}');
-                    ErrorPopup(context);
-                  }
-                }
-                if (Platform.isIOS) {
-                  ios_VersionNumber = versionList.first.iosVersion;
-                  // iOS 13.1, iPhone 11 Pro Max iPhone
-                  if (int.parse(BuildNumber) >= ios_VersionNumber) {
-                    print('Build ios ${BuildNumber}/${ios_VersionNumber}');
-                    InitStateMain();
-                  } else {
-                    print('Build123 ios ${BuildNumber}/${ios_VersionNumber}');
-                    ErrorPopup(context);
-                  }
-                }
-              });
+    getApi().getVersionitem(context).then((users) {
+      setState(() {
+        versionList = users!;
+        if (versionList.length == 0) {
+        } else {
+          getAPKBuildNum().then((value) {
+            BuildNumber = value;
+            if (Platform.isAndroid) {
+              android_VersionNumber = versionList.first.apkVersion;
+              print('Build android ${BuildNumber}');
+              // Android 9 (SDK 28), Xiaomi Redmi Note 7
+              if (int.parse(BuildNumber) >=
+                  int.parse(android_VersionNumber)) {
+                print(
+                    'Build android ${BuildNumber} / ${android_VersionNumber}');
+                InitStateMain();
+              } else {
+                print(
+                    'Build123 android ${BuildNumber} / ${android_VersionNumber}');
+                ErrorPopup(context);
+              }
+            }
+            if (Platform.isIOS) {
+              ios_VersionNumber = versionList.first.iosVersion;
+              // iOS 13.1, iPhone 11 Pro Max iPhone
+              if (int.parse(BuildNumber) >= ios_VersionNumber) {
+                print('Build ios ${BuildNumber}/${ios_VersionNumber}');
+                InitStateMain();
+              } else {
+                print('Build123 ios ${BuildNumber}/${ios_VersionNumber}');
+                ErrorPopup(context);
+              }
             }
           });
-        });
-      } else {
-        confirmationPopup(
-            context, 'Connection Error', 'No Internet Connection', 'OK', '');
-      }
+        }
+      });
     });
   }
 
@@ -182,7 +165,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Container(
+      body:ReuseOffline().getoffline(
+
+      Container(
         child: Center(
           child: Column(
             children: <Widget>[
@@ -224,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
-      ),
+      ),)
     );
   }
 

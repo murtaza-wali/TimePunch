@@ -1,19 +1,18 @@
 import 'dart:convert';
 
 import 'package:am_timepunch/postAPI/postapi.dart';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import 'Connectivity/ReUseConnectivity.dart';
 import 'DeviceInfo/APKReleaseVersion.dart';
 import 'DeviceInfo/DeviceIdentifier.dart';
 import 'DeviceInfo/DeviceModel.dart';
 import 'DeviceInfo/DeviceOS.dart';
 import 'DeviceInfo/DeviceVersion.dart';
-import 'Dialogboxes/ConfirmationPopup.dart';
 import 'LocalStorage/MySharedPref.dart';
 import 'listen_location.dart';
 
@@ -45,13 +44,6 @@ class _AccesskeyState extends State<Accesskey> {
   @override
   void initState() {
     super.initState();
-    check().then((intenet) {
-      if (intenet != null && intenet) {
-      } else {
-        confirmationPopupwithoutEmployeeName(
-            context, 'Connection Error', 'No Internet Connection', 'OK');
-      }
-    });
     progressDialog = new ProgressDialog(context);
     initPlatformState().then((value) {
       _ip = value;
@@ -98,60 +90,59 @@ class _AccesskeyState extends State<Accesskey> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: Text('\u{1F510} Access Key'),
-      ),
-      body: Align(
-        alignment: Alignment.center,
-        child: Container(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Text(
-                      'Enter your Access key',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    )),
-                Container(
-                    margin: EdgeInsets.all(2),
-                    child: TextField(
-                      controller: accessIdController,
-                      decoration: InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Color(0xFF09E812), width: 1.0),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.grey, width: 0.0),
-                          ),
-                          labelText: 'Access ID',
-                          labelStyle: TextStyle(
-                            color: Color(0xFF09E812),
-                          )),
-                      onChanged: (accesstext) {
-                        setState(() {});
-                      },
-                    )),
-                Container(
-                  child: Center(
-                    child: FlatButton(
-                      color: Colors.white,
-                      textColor: Colors.black,
-                      child: Text('Validate'),
-                      onPressed: () {
-                        setState(() {
-                          // yahan api hit honi hai ....
-                          if (accessIdController.text.isEmpty) {
-                            ErrorPopup(context, 'Alert',
-                                'All fields are required', 'OK');
-                          } else {
-                            check().then((intenet) {
-                              if (intenet != null && intenet) {
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: Text('\u{1F510} Access Key'),
+        ),
+        body: ReuseOffline().getoffline(
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Text(
+                          'Enter your Access key',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        )),
+                    Container(
+                        margin: EdgeInsets.all(2),
+                        child: TextField(
+                          controller: accessIdController,
+                          decoration: InputDecoration(
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Color(0xFF09E812), width: 1.0),
+                              ),
+                              border: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                    color: Colors.grey, width: 0.0),
+                              ),
+                              labelText: 'Access ID',
+                              labelStyle: TextStyle(
+                                color: Color(0xFF09E812),
+                              )),
+                          onChanged: (accesstext) {
+                            setState(() {});
+                          },
+                        )),
+                    Container(
+                      child: Center(
+                        child: FlatButton(
+                          color: Colors.white,
+                          textColor: Colors.black,
+                          child: Text('Validate'),
+                          onPressed: () {
+                            setState(() {
+                              // yahan api hit honi hai ....
+                              if (accessIdController.text.isEmpty) {
+                                ErrorPopup(context, 'Alert',
+                                    'All fields are required', 'OK');
+                              } else {
                                 postJSON()
                                     .Postdevice(accessIdController.text, _udid,
                                         _model, _os, _ip, context)
@@ -184,38 +175,20 @@ class _AccesskeyState extends State<Accesskey> {
                                         'Invalid Key Entered !', 'OK');
                                   }
                                 });
-                              } else {
-                                confirmationPopupwithoutEmployeeName(
-                                    context,
-                                    'Connection Error',
-                                    'No Internet Connection',
-                                    'OK');
                               }
-                            });
-                          }
-                          /*else {
+                              /*else {
                           ErrorPopup(context, 'Error',
                           'Enter Invalid Ke!', 'OK');
                           }*/
-                        });
-                      },
+                            });
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            )),
-      ),
-    );
-  }
-
-  Future<bool> check() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.mobile) {
-      return true;
-    } else if (connectivityResult == ConnectivityResult.wifi) {
-      return true;
-    }
-    return false;
+                  ],
+                )),
+          ),
+        ));
   }
 
   confirmationPopup(
