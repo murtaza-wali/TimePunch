@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:am_timepunch/postAPI/postapi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:network_info_plus/network_info_plus.dart';
+import 'package:get_ip/get_ip.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
@@ -74,10 +74,9 @@ class _AccesskeyState extends State<Accesskey> {
 //Upgrading Flutter to 2.6.0-5.2.pre from 2.2.2 in C:\flutter...
   Future<String> initPlatformState() async {
     String ipAddress;
-    final info = NetworkInfo();
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      ipAddress = (await info.getWifiIP())!;
+      ipAddress = (await GetIp.ipAddress)!;
       print('IP ADDRESS: ${ipAddress}');
     } on PlatformException {
       ipAddress = 'Failed to get ipAddress.';

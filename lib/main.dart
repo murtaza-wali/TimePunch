@@ -79,14 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
               android_VersionNumber = versionList.first.apkVersion;
               print('Build android ${BuildNumber}');
               // Android 9 (SDK 28), Xiaomi Redmi Note 7
-              if (int.parse(BuildNumber) >=
-                  int.parse(android_VersionNumber)) {
-                print(
-                    'Build android ${BuildNumber} / ${android_VersionNumber}');
+              if (int.parse(BuildNumber) >= int.parse(android_VersionNumber)) {
+                print('Build android ${BuildNumber} / ${android_VersionNumber}');
                 InitStateMain();
               } else {
-                print(
-                    'Build123 android ${BuildNumber} / ${android_VersionNumber}');
+                print('Build123 android ${BuildNumber} / ${android_VersionNumber}');
                 ErrorPopup(context);
               }
             }
@@ -117,11 +114,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 new Future.delayed(const Duration(seconds: 3), () {
                   Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(
-                          builder: (BuildContext context) => Accesskey()),
-                      (Route<dynamic> route) => false);
+                      MaterialPageRoute(builder: (BuildContext context) => Accesskey()), (Route<dynamic> route) => false);
                 });
-              } else if (initScreen == 1) {
+              }
+              else if (initScreen == 1) {
                 // MySharedPreferences.instance.setIntValue("initScreen", 2);
                 MySharedPreferences.instance
                     .getStringValue("empcode")
@@ -137,7 +133,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                           Accesskey()),
                                   (Route<dynamic> route) => false);
                             });
-                          } else {
+                          }
+                          else {
                             new Future.delayed(const Duration(seconds: 3), () {
                               Navigator.pushAndRemoveUntil(
                                   context,
@@ -148,15 +145,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             });
                           }
                         }));
-                /*  print('employee code ${emplloyeecode}');
-      new Future.delayed(const Duration(seconds: 3), () {
-        //
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (BuildContext context) => ListenLocationWidget()),
-                (Route<dynamic> route) => false);
-      });*/
               }
             }));
   }

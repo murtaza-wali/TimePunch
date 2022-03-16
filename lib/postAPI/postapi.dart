@@ -35,7 +35,7 @@ class postJSON {
       if (deviceresult.statusCode == 200) {
         return deviceresult;
       } else {
-        ErrorPopup(context, 'Error', 'Bad request error!', 'OK');
+        return null;
       }
     } on SocketException catch (e) {
       throw confirmationPopup(
@@ -135,7 +135,7 @@ class postJSON {
       if (deviceresult.statusCode == 200) {
         return deviceresult;
       } else {
-        ErrorPopup(context, 'Error', 'Bad request error!', 'OK');
+        return null;
       }
     } on SocketException catch (e) {
       throw ErrorPopup(
@@ -164,7 +164,7 @@ class postJSON {
       if (deviceresult.statusCode == 200) {
         return deviceresult;
       } else {
-        ErrorPopup(context, 'Error', 'Bad request error!', 'OK');
+        return null;
       }
     } on SocketException catch (e) {
       throw ErrorPopup(

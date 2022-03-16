@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'currenttime_class.dart';
+import 'getlogsApi.dart';
 
 class getApi {
   Future<List<Item>?> getvalidate(context, String key) async {
@@ -22,6 +23,36 @@ class getApi {
       var parse = json.decode(GPresult.body);
       var data = parse['items'] as List;
       var GPmap = data.map<Item>((json) => Item.fromJson(json));
+      if (GPresult.statusCode == 200) {
+        return GPmap.toList();
+      } else {
+        return null;
+      }
+    } on SocketException catch (e) {
+      throw ErrorPopup(context, 'Connection Error',
+          'No Internet connection.Kindly refresh the page.', 'OK');
+    } on HttpException catch (e) {
+      throw ErrorPopup(context, 'Server Error', 'No Service Found', 'OK');
+    } on FormatException catch (e) {
+      throw ErrorPopup(context, 'Invalid Format',
+          'There is a problem with your request.', 'OK');
+    } catch (e) {
+      throw ErrorPopup(
+          context, 'Unknown Error', 'An Unknown error occured.', 'OK');
+    }
+  }
+
+  Future<List<Logsitem>?> getLogs(context, String key) async {
+    // Uri.parse must when you are passing URL.
+    try {
+      var validateURL =
+          Uri.parse(BaseURL().Auth + "timepunch/logs/" + key.toString());
+
+      final GPresult = await http.get(validateURL);
+
+      var parse = json.decode(GPresult.body);
+      var data = parse['items'] as List;
+      var GPmap = data.map<Logsitem>((json) => Logsitem.fromJson(json));
       if (GPresult.statusCode == 200) {
         return GPmap.toList();
       } else {

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:am_timepunch/main.dart';
 import 'package:am_timepunch/postAPI/currenttime_class.dart';
 import 'package:am_timepunch/postAPI/getAPI.dart';
+import 'package:am_timepunch/postAPI/getlogsApi.dart';
 import 'package:am_timepunch/postAPI/postapi.dart';
 import 'package:am_timepunch/postAPI/validate_class.dart';
 import 'package:flutter/rendering.dart';
@@ -10,7 +11,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
-import 'package:network_info_plus/network_info_plus.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'Connectivity/ReUseConnectivity.dart';
@@ -91,6 +91,7 @@ class ListenLocationWidget extends StatefulWidget {
 class _ListenLocationState extends State<ListenLocationWidget>
     with WidgetsBindingObserver {
   final Location location = Location();
+  List<Logsitem> loglist = [];
 
   // String am_location = '';
   late String emplloyeecode;
@@ -146,7 +147,9 @@ class _ListenLocationState extends State<ListenLocationWidget>
                             .postversion_chk(context, akey, BuildNumber)
                             .then((value) {});
                       });
-
+                      getApi().getLogs(context, akey).then((value) {
+                        loglist = value!;
+                      });
                       getApi().getvalidate(context, akey).then((value) {
                         list = value!;
                         isactive = list[0].isactive;
@@ -216,10 +219,6 @@ class _ListenLocationState extends State<ListenLocationWidget>
         }));
 
     super.initState();
-    initPlatformState().then((value) {
-      ip = value;
-      print('_ip: ${ip}');
-    });
     WidgetsBinding.instance!.addObserver(this);
     MySharedPreferences.instance
         .getStringValue("empcode")
@@ -421,21 +420,6 @@ class _ListenLocationState extends State<ListenLocationWidget>
     });
   }
 
-  Future<String> initPlatformState() async {
-    String ipAddress;
-    final info = NetworkInfo();
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      ipAddress = (await info.getWifiIP())!;
-      print('IP ADDRESS: ${ipAddress}');
-    } on PlatformException {
-      ipAddress = 'Failed to get ipAddress.';
-    }
-    if (!mounted) return '';
-
-    return ipAddress;
-  }
-
   @override
   void dispose() {
     print('check');
@@ -459,6 +443,26 @@ class _ListenLocationState extends State<ListenLocationWidget>
                 'assets/logo_white.png',
                 fit: BoxFit.cover,
                 height: 30,
+              ),
+              CustomElevation(
+                height: 35,
+                child: FlatButton(
+                  shape: StadiumBorder(),
+                  color: Colors.black,
+                  onPressed: () {
+                    getApi().getLogs(context, akey).then((value) {
+                      loglist = value!;
+                      loglist.length==0?Container():Navigator.of(context).push(
+                        PageRouteBuilder(
+                            pageBuilder: (context, _, __) =>
+                                customAler(loglist, context,emplloyeename),
+                            opaque: false),
+                      );
+                    });
+
+                  },
+                  child: Text('Logs'),
+                ),
               ),
               Text('${currenttime == null ? 'Loading...' : currenttime}'),
               /* Text('canMockLocation():'),
@@ -549,9 +553,12 @@ class _ListenLocationState extends State<ListenLocationWidget>
                         ),
                         onTap: () {
                           // yahan post api ayegiii...
+                          print('Employee code${emplloyeecode}');
+                          print('Employee ORG${org_id}');
+                          print('Employee akey${akey}');
                           postJSON()
                               .PostemployeeAttendace(
-                                  context, emplloyeecode, org_id, ip, akey)
+                                  context, emplloyeecode, org_id, "0", akey)
                               .then((value) {
                             print('post : ${value}');
                             confirmationPopup(
@@ -710,4 +717,128 @@ class _ListenLocationState extends State<ListenLocationWidget>
           ),
         ]).show();
   }
+}
+
+class CustomElevation extends StatelessWidget {
+  final Widget child;
+  final double height;
+
+  CustomElevation({required this.child, required this.height})
+      : assert(child != null);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: this.height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(this.height / 2)),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: height / 5,
+            offset: Offset(0, height / 5),
+          ),
+        ],
+      ),
+      child: this.child,
+    );
+  }
+}
+
+customAler(List<Logsitem> list, BuildContext context,String emplyename) {
+  return AlertDialog(
+    insetPadding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+    title: Align(
+      alignment: Alignment.center,
+      child: Row(
+        children: [
+          new Expanded(
+            child: Text(
+              '${emplyename}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 17.0,
+                fontFamily: 'headingfont',
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20))),
+    actions: <Widget>[
+      FlatButton(
+        child: const Text('CANCEL',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14.0,
+              fontFamily: 'headingfont',
+            )),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+    ],
+    content: StatefulBuilder(
+      builder: (BuildContext context, void Function(void Function()) setState) {
+        return Container(
+          height: 400,
+          child:
+        SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: DataTable(
+              sortColumnIndex: 0,
+              dividerThickness: 2,
+              headingTextStyle: TextStyle(
+                  color: Colors.white, fontFamily: 'headerfont', fontSize: 15),
+              showCheckboxColumn: false,
+              dataRowHeight: 60,
+              headingRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.grey),
+              headingRowHeight: 40,
+              horizontalMargin: 10,
+              columns: <DataColumn>[
+                DataColumn(
+                  label: Text(
+                    'Location',
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'Access Time',
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
+                ),
+              ],
+              rows: List.generate(
+                  list.length,
+                      (index) => DataRow(cells: [
+                    DataCell(
+                      Text('${list[index].orgCode}',
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'headerfont',
+                              fontSize: 15)),
+                    ),
+                    DataCell(Text('${list[index].accessTime}',
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                        softWrap: false,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'headerfont',
+                            fontSize: 15))),
+                  ]))),
+        ),);
+      },
+    ),
+  );
 }
