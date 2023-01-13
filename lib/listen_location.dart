@@ -366,7 +366,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
     // print('${_stopListen()}');
     if (!mounted) return;
     try {
-      canMockLocation = await SafeDevice.canMockLocation;
+      // canMockLocation = await SafeDevice.canMockLocation;
     } catch (error) {
       print(error);
     }
@@ -446,9 +446,9 @@ class _ListenLocationState extends State<ListenLocationWidget>
               ),
               CustomElevation(
                 height: 35,
-                child: FlatButton(
-                  shape: StadiumBorder(),
-                  color: Colors.black,
+                child: TextButton(
+                  // shape: StadiumBorder(),
+                  // color: Colors.black,
                   onPressed: () {
                     getApi().getLogs(context, akey).then((value) {
                       loglist = value!;
@@ -769,14 +769,14 @@ customAler(List<Logsitem> list, BuildContext context,String emplyename) {
     shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(20))),
     actions: <Widget>[
-      FlatButton(
+      TextButton(
         child: const Text('CANCEL',
             style: TextStyle(
               color: Colors.white,
               fontSize: 14.0,
               fontFamily: 'headingfont',
             )),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        // materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         onPressed: () {
           Navigator.pop(context);
         },

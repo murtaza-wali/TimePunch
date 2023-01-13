@@ -131,10 +131,13 @@ class _AccesskeyState extends State<Accesskey> {
                         )),
                     Container(
                       child: Center(
-                        child: FlatButton(
-                          color: Colors.white,
-                          textColor: Colors.black,
-                          child: Text('Validate'),
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.white,
+                          ),
+                          // color: Colors.white,
+                          // textColor: Colors.black,
+                          child: Text('Validate',style: TextStyle(color: Colors.black),),
                           onPressed: () {
                             setState(() {
                               // yahan api hit honi hai ....

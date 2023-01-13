@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late String emplloyeecode;
   late List<Versionitem> versionList;
   late String android_VersionNumber;
-  late int ios_VersionNumber;
+  // late int ios_VersionNumber;
   late String BuildNumber;
 
   @override
@@ -87,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ErrorPopup(context);
               }
             }
-            if (Platform.isIOS) {
+            /*if (Platform.isIOS) {
               ios_VersionNumber = versionList.first.iosVersion;
               // iOS 13.1, iPhone 11 Pro Max iPhone
               if (int.parse(BuildNumber) >= ios_VersionNumber) {
@@ -97,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 print('Build123 ios ${BuildNumber}/${ios_VersionNumber}');
                 ErrorPopup(context);
               }
-            }
+            }*/
           });
         }
       });
