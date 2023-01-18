@@ -366,7 +366,7 @@ class _ListenLocationState extends State<ListenLocationWidget>
     // print('${_stopListen()}');
     if (!mounted) return;
     try {
-      // canMockLocation = await SafeDevice.canMockLocation;
+       canMockLocation = await SafeDevice.canMockLocation;
     } catch (error) {
       print(error);
     }
